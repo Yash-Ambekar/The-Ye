@@ -1,6 +1,14 @@
-const {checkCondition} = require('../../utils/checkCondition')
-const {getLocationDetails, getImageDetails, getTextDetails} = require('../../utils/getMessageDetails')
-
+const {
+  getMedicine,
+  fuzzyLogicSearch,
+} = require("../../models/medicine.model");
+const { checkCondition } = require("../../utils/checkCondition");
+const { sendHello, sendPossibleName } = require("../../utils/sendResponse");
+const {
+  getLocationDetails,
+  getImageDetails,
+  getTextDetails,
+} = require("../../utils/getMessageDetails");
 
 function verifyToken(req, res) {
   if (
@@ -13,11 +21,21 @@ function verifyToken(req, res) {
   }
 }
 
-function hookMessage(req, res) {
+async function hookMessage(req, res) {
+  let med1Name = "";
+  let med2Name = "";
+
   if (req.body.object) {
-    switch(checkCondition(req)) {
+    // console.log(req.body?.entry[0].changes[0]?.value?.statuses)
+    switch (checkCondition(req)) {
       case "text":
-        getTextDetails(req);
+        const details = getTextDetails(req);
+        // const med = await getMedicine(details.msg);
+        const med = await fuzzyLogicSearch(details.msg);
+        // med1Name = med.name1;
+        // med2Name = med.name2;
+        // await sendHello(details.sender);
+        await sendPossibleName(details.msg, med, details.sender)
         break;
       case "image":
         getImageDetails(req);
@@ -26,17 +44,14 @@ function hookMessage(req, res) {
         getLocationDetails(req);
         break;
       default:
-        res.sendStatus(400);
+        console.log("Not Working");
     }
     // const medName = getMedicine(medicineName);
     // if (!medName) return res.sendStatus(400);
-    res.sendStatus(200);
-    
-  } 
+
+    res.json({ med1Name, med2Name });
+  }
 }
-
-
-
 
 module.exports = {
   verifyToken,
