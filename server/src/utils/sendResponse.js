@@ -2,7 +2,20 @@ const user = require("../models/users.model");
 
 
 async function sendPossibleName(medName,possibleMed, phoneNumber) {
-   
+   const row = []
+  for(i = 0; i < 3; i++){
+    if(possibleMed[i]){
+        row.push({
+            "id": `SECTION_1_ROW_${i}_ID`,
+            "title": `${possibleMed[i].split(' ').slice(0,1).join(" ")}` || "None",
+            "description" : `${possibleMed[i]}`|| ""
+          })
+    }
+  }
+  row.push({
+    "id": "SECTION_1_ROW_4_ID",
+    "title": "None",
+  })
     const response = await fetch(
       `https://graph.facebook.com/v16.0/${process.env["WHATSAPP_PHONE_NUMBER_ID"]}/messages`,
       {
@@ -23,7 +36,8 @@ async function sendPossibleName(medName,possibleMed, phoneNumber) {
             //     "text": "Choose Medicine Name"
             //   },
               "body": {
-                "text": `*Choose* *the* *Medicine* *Name* Please click on a possible correct medicine name and then click on send`
+                "text": `*Choose* *the* *Medicine* *Name*
+Please click on a possible correct medicine name and then click on send`
               },
             //   "footer": {
             //     "text": "FOOTER_TEXT"
@@ -32,24 +46,7 @@ async function sendPossibleName(medName,possibleMed, phoneNumber) {
                 "button": medName? `*${medName}*`: "None",
                 "sections": [
                   {
-                    "rows": [
-                      {
-                        "id": "SECTION_1_ROW_1_ID",
-                        "title": possibleMed[0]? possibleMed[0]: "None",
-                      },
-                      {
-                        "id": "SECTION_1_ROW_2_ID",
-                        "title": `${possibleMed[1]}` || "None",
-                      },
-                      {
-                        "id": "SECTION_1_ROW_3_ID",
-                        "title": `${possibleMed[2]}` || "None",
-                      }, 
-                      {
-                        "id": "SECTION_1_ROW_4_ID",
-                        "title": "None",
-                      }
-                    ]
+                    "rows": row
                   },
                   
                 ]
