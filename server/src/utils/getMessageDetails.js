@@ -60,8 +60,38 @@ function getLocationDetails(req) {
   };
 }
 
+function getReplies(req) {
+  const from = req.body.entry[0].changes[0].value.contacts[0].wa_id;
+  let body = "";
+  let type = "";
+  if(req.body.entry[0].changes[0].value.messages[0].interactive.list_reply){
+    body = req.body.entry[0].changes[0].value.messages[0].interactive.list_reply.description;
+    type = "description";
+  }
+  else if(req.body.entry[0].changes[0].value.messages[0].interactive.button_reply){
+    body = req.body.entry[0].changes[0].value.messages[0].interactive.button_reply.title;
+    type = "button-reply";
+  }
+  console.log(
+    "Reply Details:",
+    JSON.stringify({
+      sender: from,
+      reply: body,
+      replyType: type,
+    })
+  );
+
+  return {
+    sender: from,
+    reply: body,
+    replyType: type,
+  };
+}
+
+
 module.exports = {
   getTextDetails,
   getImageDetails,
-  getLocationDetails
+  getLocationDetails,
+  getReplies,
 };
