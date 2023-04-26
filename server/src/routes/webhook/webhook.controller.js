@@ -6,7 +6,7 @@ const {
   getTextDetails,
   getReplies,
 } = require("../../utils/getMessageDetails");
-const { getUser, changeDetails } = require("../../models/users.model");
+const { getUser } = require("../../models/users.model");
 
 function verifyToken(req, res) {
   if (

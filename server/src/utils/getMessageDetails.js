@@ -47,7 +47,7 @@ function getImageDetails(req) {
 }
 
 function getLocationDetails(req) {
-  const from = req.body.entry[0].changes[0].value.messages[0].from;
+  const from = req.body.entry[0].changes[0].value.contacts[0].wa_id;
   const address = req.body.entry[0].changes[0].value.messages[0].location.url;
   const lat = req.body.entry[0].changes[0].value.messages[0].location.latitude;
   const long = req.body.entry[0].changes[0].value.messages[0].location.longitude;

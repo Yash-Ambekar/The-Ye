@@ -5,7 +5,8 @@ let users = [
     stage: 0,
     medicine: "",
     totalNumberOfMeds: 0,
-    currLocation: ""
+    currLocation: "",
+    messageID:"",
   },
   {
     phone_number: "917021938092",
@@ -13,7 +14,8 @@ let users = [
     stage: 0,
     medicine: "",
     totalNumberOfMeds: 0,
-    currLocation: "IIIT Pune, Vadgaon Budruk."
+    currLocation: "IIIT Pune, Vadgaon Budruk.",
+    messageID:"",
   },
 ];
 
@@ -31,6 +33,8 @@ function addUser(user) {
       stage: 0,
       medicine: "",
       totalNumberOfMeds: 0,
+      currLocation: "",
+      messageID:"",
     });
   }
 
@@ -40,6 +44,8 @@ function addUser(user) {
     stage: 0,
     medicine: "",
     totalNumberOfMeds: 0,
+    currLocation: "",
+    messageID:"",
   };
 }
 
@@ -74,6 +80,10 @@ function changeDetails(userDetails, replyDetails) {
 
         if(replyDetails?.type && replyDetails?.type === "location"){
           user.currLocation = replyDetails.address;
+        }
+        if (replyDetails && replyDetails?.replyType && replyDetails?.replyType === "button-reply"
+        && replyDetails?.reply === "Confirm"){
+          user.messageID = replyDetails?.messageID;
         }
         if (user.totalNumberOfMeds === 0) user.stage = user.stage + 1;
         else user.totalNumberOfMeds = user.totalNumberOfMeds - 1;
