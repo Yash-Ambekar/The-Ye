@@ -1,12 +1,12 @@
 const { checkCondition } = require("../../utils/checkCondition");
-const { handleText, handleListReply , handleButtonReply} = require("../../utils/sendResponse");
+const { handleText, handleListReply , handleLocationReply, handleButtonReply, handleImageReply} = require("../../utils/sendResponse");
 const {
   getLocationDetails,
   getImageDetails,
   getTextDetails,
   getReplies,
 } = require("../../utils/getMessageDetails");
-const { getUser } = require("../../models/users.model");
+const { getUser, changeDetails } = require("../../models/users.model");
 
 function verifyToken(req, res) {
   if (
@@ -20,24 +20,30 @@ function verifyToken(req, res) {
 }
 
 async function hookMessage(req, res) {
-  let med1Name = "";
-  let med2Name = "";
 
   if (req.body.object) {
-    // console.log(req.body?.entry[0].changes[0]?.value?.statuses)
+
     switch (checkCondition(req)) {
-      case "text":
+
+      case "text": 
         const textDetails = getTextDetails(req);
         const user = await getUser(textDetails);
         console.log(user);
         await handleText(textDetails, user.stage);
         break;
+
       case "image":
-        getImageDetails(req);
+        const imageDetails = getImageDetails(req);
+        await handleImageReply(imageDetails);
         break;
+
       case "location":
-        getLocationDetails(req);
+        const locationDetails = getLocationDetails(req);
+        console.log(req.body.entry[0].changes[0].value.messages[0].location)
+        const userDetails = await getUser(locationDetails);
+        await handleLocationReply(userDetails, locationDetails)
         break;
+
       case "interactive":
         const replyDetails = getReplies(req);
         if (
@@ -46,22 +52,30 @@ async function hookMessage(req, res) {
           replyDetails.replyType === "description"
         ){
           const user = await getUser(replyDetails)
+          console.log(user)
           handleListReply(replyDetails, user);
+
         }
         else if (
           replyDetails.reply &&
-          replyDetails.reply !== "None" &&
+          replyDetails.reply === "Confirm" &&
           replyDetails.replyType === "button-reply"
         ){
           const user = await getUser(replyDetails)
+          console.log(user)
           handleButtonReply(replyDetails, user);
         } 
+        else if (
+          replyDetails.reply &&
+          replyDetails.reply === "Accept" &&
+          replyDetails.replyType === "button-reply"
+        ){
+
+        }
         break;
     }
-    // const medName = getMedicine(medicineName);
-    // if (!medName) return res.sendStatus(400);
 
-    res.json({ med1Name, med2Name });
+    res.sendStatus(200);
   }
 }
 

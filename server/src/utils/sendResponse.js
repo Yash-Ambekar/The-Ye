@@ -59,7 +59,7 @@ Please click on a possible correct medicine name and then click on send`,
   console.log(response.status);
 }
 
-async function sendHello(phoneNumber, text) {
+async function sendText(phoneNumber, text) {
   const helloText =
     "Hello there! Please send your medicines in this format: ABC, DEF, GHI.... OR send the image of Medical Prescription";
   const response = await fetch(
@@ -86,7 +86,7 @@ async function sendHello(phoneNumber, text) {
   console.log(response.status);
 }
 
-async function sendConfirmation(phoneNumber, reply) {
+async function sendConfirmation(userDetails) {
   const response = await fetch(
     `https://graph.facebook.com/v16.0/${process.env["WHATSAPP_PHONE_NUMBER_ID"]}/messages`,
     {
@@ -98,13 +98,14 @@ async function sendConfirmation(phoneNumber, reply) {
       body: JSON.stringify({
         messaging_product: "whatsapp",
         recipient_type: "individual",
-        to: `${phoneNumber}`,
+        to: `${userDetails.phone_number}`,
         type: "interactive",
         interactive: {
           type: "button",
           body: {
-            text: `*Confirm the List of Medicines*:
-${reply}`,
+            text: `*Confirm the List of Medicines and Location*
+${userDetails.medicine ? userDetails.medicine : ""}
+Location: ${userDetails.currLocation}`,
           },
           action: {
             buttons: [
@@ -154,7 +155,7 @@ async function sendRequestToSingleStore(
         interactive: {
           type: "button",
           body: {
-            text: `Medicine Name: ${medicine}
+            text: `Medicine Name: ${medicine ? medicine : "Check the Image"}
 location: ${location}
 Patients Phone Number: ${patientsPhoneNumber}`,
           },
@@ -184,6 +185,44 @@ Patients Phone Number: ${patientsPhoneNumber}`,
   console.log(response.status);
 }
 
+async function sendImageToStore(
+  storePhoneNumber,
+  imageID
+) {
+  const response = await fetch(
+    `https://graph.facebook.com/v16.0/${process.env["WHATSAPP_PHONE_NUMBER_ID"]}/messages`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env["WHATSAPP_TOKEN"]}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        "messaging_product": "whatsapp",
+        "recipient_type": "individual",
+        "to": storePhoneNumber,
+        "type": "image",
+        "image": {
+          "id" : imageID
+        }
+      }),
+    }
+  );
+
+  console.log(response.status);
+}
+
+async function sendImageToStores(imageID){
+  const stores = await getStores();
+  await Promise.all(
+    stores?.map(async(store) => {
+      await sendImageToStore(
+        store.storePhoneNumber,
+        imageID
+      );
+    })
+  );
+}
 // Sending Patients Medicine Request to the Stores
 
 async function sendToStores(phoneNumber, medicine, location) {
@@ -203,7 +242,7 @@ async function sendToStores(phoneNumber, medicine, location) {
 async function handleText(userDetails, stage) {
   switch (stage) {
     case 0:
-      await sendHello(userDetails.sender);
+      await sendText(userDetails.sender);
       changeDetails(userDetails);
       break;
     case 1:
@@ -214,19 +253,38 @@ async function handleText(userDetails, stage) {
 }
 
 async function handleListReply(replyDetails, userDetails) {
-  await sendConfirmation(replyDetails.sender, replyDetails.reply);
   changeDetails(userDetails, replyDetails);
+  const text = "Please send your current location by clicking on Attachments --> Location --> Turn Location Services --> Send Current Location"
+  await sendText(userDetails.phone_number, text);
 }
 
 async function handleButtonReply(replyDetails, userDetails) {
-  await sendToStores(replyDetails.sender, userDetails.medicine, "Vadgaon Budruk");
+  await sendToStores(replyDetails.sender, userDetails.medicine, userDetails.currLocation);
+  changeDetails(userDetails, replyDetails);
+}
+
+async function handleImageReply(imageDetails){
+  const imageID = imageDetails.imageID;
+  const sender = imageDetails.sender;
+  const caption = imageDetails.caption;
+  await sendImageToStores(imageID);
+  await sendToStores(sender, "", "Vadgaon Budruk");
+} 
+
+async function handleLocationReply(userDetails, locationDetails){
+  changeDetails(userDetails, locationDetails)
+  await sendConfirmation(userDetails);
 }
 
 module.exports = {
-  sendHello,
+  sendText,
   sendPossibleName,
   sendConfirmation,
+  sendImageToStore,
+  sendToStores,
   handleText,
   handleListReply,
   handleButtonReply,
+  handleImageReply,
+  handleLocationReply
 };

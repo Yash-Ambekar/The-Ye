@@ -1,14 +1,14 @@
 let stores = [
-    {
-        storeID: 0,
-        StoreName: "Soham's Medical Store",
-        storePhoneNumber: "917028442761"
-    },
-    {
-        storeID: 1,
-        StoreName: "Parth's Medical Store",
-        storePhoneNumber: "918380974904"
-    },
+    // {
+    //     storeID: 0,
+    //     StoreName: "Soham's Medical Store",
+    //     storePhoneNumber: "917028442761"
+    // },
+    // {
+    //     storeID: 1,
+    //     StoreName: "Parth's Medical Store",
+    //     storePhoneNumber: "918380974904"
+    // },
     // {
     //     storeID: 2,
     //     StoreName: "Pankaj's Medical Store",
