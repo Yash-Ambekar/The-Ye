@@ -70,7 +70,7 @@ async function fuzzyLogicSearch(medicineName) {
   let result = ["", "", "",1];
   // Create a new instance of the Fuse.js search object
   
-  for (i = 65; i <= 80; i++) {
+  for (i = 65; i <= 90; i++) {
       const fuse = new Fuse(medicineNames?.default[String.fromCharCode(i)], options);
      
       

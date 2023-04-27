@@ -5,17 +5,10 @@ let users = [
     stage: 0,
     medicine: "",
     totalNumberOfMeds: 0,
+    latitude: 0,
+    longitude: 0,
     currLocation: "",
-    messageID:"",
-  },
-  {
-    phone_number: "917021938092",
-    name: "Yash Ambekar",
-    stage: 0,
-    medicine: "",
-    totalNumberOfMeds: 0,
-    currLocation: "IIIT Pune, Vadgaon Budruk.",
-    messageID:"",
+    messageID: "",
   },
 ];
 
@@ -33,8 +26,10 @@ function addUser(user) {
       stage: 0,
       medicine: "",
       totalNumberOfMeds: 0,
+      latitude: 0,
+      longitude: 0,
       currLocation: "",
-      messageID:"",
+      messageID: "",
     });
   }
 
@@ -43,9 +38,11 @@ function addUser(user) {
     name: user.name,
     stage: 0,
     medicine: "",
+    latitude: 0,
+    longitude: 0,
     totalNumberOfMeds: 0,
     currLocation: "",
-    messageID:"",
+    messageID: "",
   };
 }
 
@@ -78,11 +75,13 @@ function changeDetails(userDetails, replyDetails) {
           }
         }
 
-        if(replyDetails?.type && replyDetails?.type === "location"){
+        if (replyDetails?.type && replyDetails?.type === "location") {
+          user.latitude = replyDetails.Latitude;
+          user.longitude = replyDetails.Longitude;
           user.currLocation = replyDetails.address;
         }
         if (replyDetails && replyDetails?.replyType && replyDetails?.replyType === "button-reply"
-        && replyDetails?.reply === "Confirm"){
+          && replyDetails?.reply === "Confirm") {
           user.messageID = replyDetails?.messageID;
         }
         if (user.totalNumberOfMeds === 0) user.stage = user.stage + 1;

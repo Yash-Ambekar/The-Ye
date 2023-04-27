@@ -1,5 +1,5 @@
 const { fuzzyLogicSearch } = require(".././models/medicine.model");
-const { changeDetails } = require("../models/users.model");
+const { changeDetails, getUser } = require("../models/users.model");
 const { getStores } = require("../models/stores.model");
 
 async function sendPossibleName(medName, possibleMed, phoneNumber) {
@@ -61,7 +61,9 @@ Please click on a possible correct medicine name and then click on send`,
 
 async function sendText(phoneNumber, text) {
   const helloText =
-    "Hello there! Please send your medicines in this format: ABC, DEF, GHI.... OR send the image of Medical Prescription";
+    `Hello 👋! Please type in the name of the medicine you need. If you're not sure about the spelling, just type in a few letters and we'll suggest some options for you.
+
+You can also send us a photo of your prescription. To do this, tap on the paperclip icon below and select 'Camera'📷 or 'Gallery'. We'll review it and get back to you soon. Thanks! ✌️`;
   const response = await fetch(
     `https://graph.facebook.com/v16.0/${process.env["WHATSAPP_PHONE_NUMBER_ID"]}/messages`,
     {
@@ -104,8 +106,10 @@ async function sendConfirmation(userDetails) {
           type: "button",
           body: {
             text: `*Confirm the List of Medicines and Location*
+
 ${userDetails.medicine ? userDetails.medicine : ""}
-Location: ${userDetails.currLocation}`,
+
+*Location*: ${userDetails.currLocation}`,
           },
           action: {
             buttons: [
@@ -155,9 +159,11 @@ async function sendRequestToSingleStore(
         interactive: {
           type: "button",
           body: {
-            text: `Medicine Name: ${medicine ? medicine : "Check the Image"}
-location: ${location}
-Patients Phone Number: ${patientsPhoneNumber}`,
+            text: `*Medicine Name*: ${medicine ? medicine : "Check the Image"}
+
+*Location*: ${location}
+
+*Patients Phone Number*: ${patientsPhoneNumber}`,
           },
           action: {
             buttons: [
@@ -203,7 +209,7 @@ async function sendImageToStore(
         "to": storePhoneNumber,
         "type": "image",
         "image": {
-          "id" : imageID
+          "id": imageID
         }
       }),
     }
@@ -212,10 +218,10 @@ async function sendImageToStore(
   console.log(response.status);
 }
 
-async function sendImageToStores(imageID){
-  const stores = await getStores();
+async function sendImageToStores(imageID) {
+  const stores = await getStores(userDetails);
   await Promise.all(
-    stores?.map(async(store) => {
+    stores?.map(async (store) => {
       await sendImageToStore(
         store.storePhoneNumber,
         imageID
@@ -225,15 +231,15 @@ async function sendImageToStores(imageID){
 }
 // Sending Patients Medicine Request to the Stores
 
-async function sendToStores(phoneNumber, medicine, location) {
-  const stores = await getStores();
+async function sendToStores(userDetails) {
+  const stores = await getStores(userDetails);
   await Promise.all(
     stores?.map(async (store) => {
       await sendRequestToSingleStore(
-        phoneNumber,
+        userDetails.phone_number,
         store.storePhoneNumber,
-        medicine,
-        location
+        userDetails.medicine,
+        userDetails.currLocation
       );
     })
   );
@@ -254,24 +260,30 @@ async function handleText(userDetails, stage) {
 
 async function handleListReply(replyDetails, userDetails) {
   changeDetails(userDetails, replyDetails);
-  const text = "Please send your current location by clicking on Attachments --> Location --> Turn Location Services --> Send Current Location"
+  const text = `Please send your current location by following these instructions:
+  
+➥Attachments 📎  
+➥Location 📍
+➥Switch on Location Services ⚙️
+➥Send Current Location`
   await sendText(userDetails.phone_number, text);
 }
 
 async function handleButtonReply(replyDetails, userDetails) {
-  await sendToStores(replyDetails.sender, userDetails.medicine, userDetails.currLocation);
+  await sendToStores(userDetails);
   changeDetails(userDetails, replyDetails);
 }
 
-async function handleImageReply(imageDetails){
+async function handleImageReply(imageDetails) {
   const imageID = imageDetails.imageID;
   const sender = imageDetails.sender;
   const caption = imageDetails.caption;
+  const userDetails = getUser(imageDetails);
   await sendImageToStores(imageID);
-  await sendToStores(sender, "", "Vadgaon Budruk");
-} 
+  await sendToStores(userDetails);
+}
 
-async function handleLocationReply(userDetails, locationDetails){
+async function handleLocationReply(userDetails, locationDetails) {
   changeDetails(userDetails, locationDetails)
   await sendConfirmation(userDetails);
 }

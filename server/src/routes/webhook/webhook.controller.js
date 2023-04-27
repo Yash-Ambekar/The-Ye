@@ -38,7 +38,7 @@ async function hookMessage(req, res) {
         break;
 
       case "location":
-        const locationDetails = getLocationDetails(req);
+        const locationDetails = await getLocationDetails(req);
         console.log(req.body.entry[0].changes[0].value.messages[0].location)
         const userDetails = await getUser(locationDetails);
         await handleLocationReply(userDetails, locationDetails)
