@@ -1,13 +1,12 @@
-![Doctor's Prescription System](docs/github-banner.png)
-
-# Doctor's Prescription System
-
-This project uses handwriting recognition to recognize the names of medicines from a doctor's prescription. This is done using a Convolutional Neural Network (CNN) developed using the Tensorflow Framework and OpenCV.
-
-The project can be divided into two distinct components as follows -
-
-1. Handwriting Recognition Pipeline
-2. Doctor's Prescription System App
+# The-YE
+There is a need for a more accessible and user-friendly platform for customers to purchase
+their prescribed medicines. Existing medicine delivery apps have their limitations, including
+technical difficulties, long delivery times, and limited availability in certain regions. This has
+led to a gap in research on the use of WhatsApp bots as a potential platform for aggregating
+local drugstores and providing customers with a more convenient way to purchase their
+medicines. Therefore, there is a need for further research to evaluate the feasibility and
+effectiveness of using WhatsApp bots as a platform for selling medicines and enhancing
+healthcare accessibility.
 
 # Contents
 
