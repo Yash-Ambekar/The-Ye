@@ -7,6 +7,8 @@ Medicine delivery apps are popular but can be inconvenient due to limited availa
 - [Tech Stack](#tech-stack)
 - [Medicine Dataset](#medicine-dataset)
 - [How it works](#how-it-works)
+- [Steps to setup locally](#steps-to-setup-locally)
+- [References](#references)
   
 
 
@@ -81,3 +83,8 @@ Example link -
 **NOTE:** Also subscribe to the messages mentioned in the ‘Webhook Fields’ section just below ‘Callback URL’ after verifying the webhook callback URL.
 
 **Step - 7**: Done! You are all set for testing the chatbot by sending “Hi” to the Test Number allotted to you by the Whatsapp Business API.
+
+## References
+[Whatsapp Cloud API](https://developers.facebook.com/docs/whatsapp/cloud-api)
+[Whatsapp Cloud API Send Messages](https://developers.facebook.com/docs/whatsapp/cloud-api/guides/send-messages)
+[Whatsapp Cloud Receive Message](https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples)
