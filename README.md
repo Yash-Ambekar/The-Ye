@@ -85,6 +85,7 @@ Example link -
 **Step - 7**: Done! You are all set for testing the chatbot by sending “Hi” to the Test Number allotted to you by the Whatsapp Business API.
 
 ## References
-[Whatsapp Cloud API](https://developers.facebook.com/docs/whatsapp/cloud-api)
-[Whatsapp Cloud API Send Messages](https://developers.facebook.com/docs/whatsapp/cloud-api/guides/send-messages)
-[Whatsapp Cloud Receive Message](https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples)
+
+- [Whatsapp Cloud API](https://developers.facebook.com/docs/whatsapp/cloud-api)
+- [Whatsapp Cloud API Send Messages](https://developers.facebook.com/docs/whatsapp/cloud-api/guides/send-messages)
+- [Whatsapp Cloud Receive Message](https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples)
