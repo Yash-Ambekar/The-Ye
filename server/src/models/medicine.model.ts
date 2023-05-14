@@ -1,12 +1,19 @@
-const { closest, distance } = require("fastest-levenshtein");
-// const medicine = [["abc, adc, atf"], ["bcd", "bgf", "btf"], ["Crocin Tablet", "chaymorale Forte Tablet", "Cyclopam Tablet"]];
+import { readFile } from "fs/promises";
+import Fuse from "fuse.js"
 
-function wordToVector(word) {
+
+//Utility function for reading the JSON file
+async function readJsonFile(path:string) {
+  const file = await readFile(path, "utf8");
+  return JSON.parse(file);
+}
+
+function wordToVector(word:string) {
   // Convert word to lowercase and split into characters
   const characters = word.toLowerCase().split("");
 
   // Create object to hold character frequencies
-  const vector = {};
+  const vector: {[char: string]: number} = {};
 
   // Count frequency of each character
   for (const char of characters) {
@@ -20,13 +27,13 @@ function wordToVector(word) {
   return vector;
 }
 
-function cosineSimilarity(str1, str2) {
+function cosineSimilarity(str1: string, str2: string) {
   // Convert strings to vectors
   const vec1 = wordToVector(str1);
   const vec2 = wordToVector(str2);
 
   // Calculate dot product
-  let dotProduct = 0;
+  let dotProduct: number = 0;
   for (const char in vec1) {
     if (vec2[char]) {
       dotProduct += vec1[char] * vec2[char];
@@ -45,15 +52,16 @@ function cosineSimilarity(str1, str2) {
   return dotProduct / (mag1 * mag2);
 }
 
-async function fuzzyLogicSearch(medicineName) {
+async function fuzzyLogicSearch(medicineName:string) {
   const firstLetter = medicineName.toUpperCase().charAt(0);
-  const Fuse = require("fuse.js");
+  // const Fuse = require("fuse.js");
 
   // Create an array of medicine names to search through
-  const medicineNames = await import("../models/data.json", {
-    assert: { type: "json" },
-  });
+  // const medicineNames = await import("../models/data.json", {
+  //   assert: { type: "json" },
+  // });
 
+  const medicineNames = await readJsonFile("./src/models/data.json");
   // Set up the options for the Fuse.js search
   const options = {
     shouldSort: true,
@@ -67,42 +75,47 @@ async function fuzzyLogicSearch(medicineName) {
     includeScore: true,
   };
 
-  let result = ["", "", "",1];
+  let result = {
+    0: "",
+    1: "",
+    2: "",
+    3: 1,
+  };
   // Create a new instance of the Fuse.js search object
   
-  for (i = 65; i <= 90; i++) {
-      const fuse = new Fuse(medicineNames?.default[String.fromCharCode(i)], options);
+  for (let i = 65; i <= 90; i++) {
+      const fuse = new Fuse(medicineNames[String.fromCharCode(i)], options);
      
       
       // Search for a medicine name
       const searchTerm = medicineName;
       const tempRes = fuse.search(searchTerm);
-      // if(tempRes && tempRes[0]){
-      //   console.log(tempRes[0])
-      // }
-      if (tempRes && tempRes[0] && tempRes[0]?.score < result[3]) {
+      if (tempRes && tempRes[0] && tempRes[0].score && tempRes[0].score < result[3]) {
       
         result[2] = result[1];
         result[1] = result[0];
-        result[0] = tempRes[0]?.item;
-        result[3] =  tempRes[0]?.score;
+        result[0] = tempRes[0].item as string;
+        result[3] =  tempRes[0].score;
       }
   }
 
   // Log the search results
-  console.log(result);
+  console.log(result[0]);
   return result;
 }
 
-async function getMedicine(medicineName) {
-  if (typeof medicineName !== "string" && medicineName === "") return null;
-  const medicine = await import("./data.json", { assert: { type: "json" } });
+async function getMedicine(medicineName:string) {
+  if(medicineName === "") return null;
+  const medicines = await readJsonFile("./src/models/data.json");
   const firstLetter = medicineName.toUpperCase().charAt(0);
   console.log(firstLetter);
 
-  // const closestMedicineName = closest(medicineName, medicine[firstLetter])
-  const similarWord = [0, "", ""];
-  medicine.default[firstLetter]?.map((medicine) => {
+  const similarWord = {
+    0: 0,
+    1: "",
+    2: "",
+  }
+  medicines.default[firstLetter]?.map((medicine:string) => {
     if (similarWord[0] < cosineSimilarity(medicine, medicineName)) {
       similarWord[2] = similarWord[1];
       similarWord[0] = cosineSimilarity(medicine, medicineName);
@@ -110,8 +123,6 @@ async function getMedicine(medicineName) {
     }
   });
 
-  // similarWord[1] = closest(medicineName, medicine.default[firstLetter]);
-  // similarWord[0] = distance(medicineName, similarWord[1]);
   return {
     similarity: similarWord[0],
     name1: similarWord[1],

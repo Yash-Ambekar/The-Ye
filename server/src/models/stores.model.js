@@ -8,20 +8,20 @@ let stores = [
     //     long: 73.83218669449842,
     //     storePhoneNumber: "917028442761"
     // },
-    {
-        storeID: 1,
-        StoreName: "Parth's Medical Store",
-        lat: 18.46490396061193,
-        long: 73.83431215586559,
-        storePhoneNumber: "918380974904"
-    },
-    {
-        storeID: 2,
-        StoreName: "Pankaj's Medical Store",
-        lat: 18.468385695514733,
-        long: 73.83333458652628,
-        storePhoneNumber: "918000597921"
-    },
+    // {
+    //     storeID: 1,
+    //     StoreName: "Parth's Medical Store",
+    //     lat: 18.46490396061193,
+    //     long: 73.83431215586559,
+    //     storePhoneNumber: "918380974904"
+    // },
+    // {
+    //     storeID: 2,
+    //     StoreName: "Pankaj's Medical Store",
+    //     lat: 18.468385695514733,
+    //     long: 73.83333458652628,
+    //     storePhoneNumber: "918000597921"
+    // },
     {
         storeID: 3,
         StoreName: "Yash's Medical Store",

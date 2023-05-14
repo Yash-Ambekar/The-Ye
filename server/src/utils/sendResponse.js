@@ -4,7 +4,7 @@ const { getStores } = require("../models/stores.model");
 
 async function sendPossibleName(medName, possibleMed, phoneNumber) {
   const row = [];
-  for (i = 0; i < 3; i++) {
+  for (let i = 0; i < 3; i++) {
     if (possibleMed[i]) {
       row.push({
         id: `SECTION_1_ROW_${i}_ID`,
