@@ -7,28 +7,28 @@ let stores = [
     //     StoreName: "Soham's Medical Store",
     //     lat: 19.46414031683653,
     //     long: 73.83218669449842,
-    //     storePhoneNumber: "917028442761"
+    //     storePhoneNumber: process.env['SOHAM_PHONE_NUMBER'] ?? ""
     // },
     // {
     //     storeID: 1,
     //     StoreName: "Parth's Medical Store",
     //     lat: 18.46490396061193,
     //     long: 73.83431215586559,
-    //     storePhoneNumber: "918380974904"
+    //     storePhoneNumber: process.env['PARTH_PHONE_NUMBER'] ?? ""
     // },
     // {
     //     storeID: 2,
     //     StoreName: "Pankaj's Medical Store",
     //     lat: 18.468385695514733,
     //     long: 73.83333458652628,
-    //     storePhoneNumber: "918000597921"
+    //     storePhoneNumber: process.env['PANKAJ_PHONE_NUMBER'] ?? ""
     // },
     {
         storeID: 3,
         StoreName: "Yash's Medical Store",
         lat: 19.10869426849005,
         long: 72.88467675985991,
-        storePhoneNumber: "917021938092"
+        storePhoneNumber: process.env['YASH_PHONE_NUMBER'] ?? ""
     }
 ]
 
