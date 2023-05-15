@@ -1,5 +1,6 @@
 var axios = require('axios');
 
+
 let stores = [
     // {
     //     storeID: 0,
@@ -31,16 +32,17 @@ let stores = [
     }
 ]
 
-async function getDistance(origin, destination) {
+async function getDistance(origin:number[], destination:number[]) {
     let dist = 0;
     const orign_req = `${origin[0]},${origin[1]}`;
     const destn_req = `${destination[0]},${destination[1]}`;
-
-    const url = ('https://maps.googleapis.com/maps/api/distancematrix/json?' + new URLSearchParams({
+    const params = new URLSearchParams({
         origins: orign_req,
         destinations: destn_req,
-        key: process.env['GOOGLE_MAPS_API_KEY']
-    }))
+        key: process.env['GOOGLE_MAPS_API_KEY'] ?? ""
+      });
+
+    const url = ('https://maps.googleapis.com/maps/api/distancematrix/json?' + params.toString())
 
     var config = {
         method: 'get',
@@ -53,10 +55,11 @@ async function getDistance(origin, destination) {
     return dist;
 }
 
-async function getStores(userDetails) {
+async function getStores(userDetails:UserDetails) {
+    
     const origin = [userDetails.latitude, userDetails.longitude];
     
-    const newStores = [];
+    const newStores: Stores[] = [];
     await Promise.all(stores.map(async (store) => {
         const destination = [store.lat, store.long];
         const distance = await getDistance(origin, destination);
