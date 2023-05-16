@@ -52,7 +52,7 @@ function cosineSimilarity(str1: string, str2: string) {
   return dotProduct / (mag1 * mag2);
 }
 
-async function fuzzyLogicSearch(medicineName:string) {
+export async function fuzzyLogicSearch(medicineName:string) {
   const firstLetter = medicineName.toUpperCase().charAt(0);
   // const Fuse = require("fuse.js");
 
@@ -76,10 +76,10 @@ async function fuzzyLogicSearch(medicineName:string) {
   };
 
   let result = {
-    0: "",
-    1: "",
-    2: "",
-    3: 1,
+    "top1": "",
+    "top2": "",
+    "top3": "",
+    "score": 1,
   };
   // Create a new instance of the Fuse.js search object
   
@@ -90,21 +90,21 @@ async function fuzzyLogicSearch(medicineName:string) {
       // Search for a medicine name
       const searchTerm = medicineName;
       const tempRes = fuse.search(searchTerm);
-      if (tempRes && tempRes[0] && tempRes[0].score && tempRes[0].score < result[3]) {
+      if (tempRes && tempRes[0] && tempRes[0].score && tempRes[0].score < result["score"]) {
       
-        result[2] = result[1];
-        result[1] = result[0];
-        result[0] = tempRes[0].item as string;
-        result[3] =  tempRes[0].score;
+        result["top3"] = result["top2"];
+        result["top2"] = result["top1"];
+        result["top1"] = tempRes[0].item as string;
+        result["score"] =  tempRes[0].score;
       }
   }
 
   // Log the search results
-  console.log(result[0]);
+  console.log(result);
   return result;
 }
 
-async function getMedicine(medicineName:string) {
+export async function getMedicine(medicineName:string) {
   if(medicineName === "") return null;
   const medicines = await readJsonFile("./src/models/data.json");
   const firstLetter = medicineName.toUpperCase().charAt(0);
@@ -130,7 +130,8 @@ async function getMedicine(medicineName:string) {
   };
 }
 
-module.exports = {
+export default{
   getMedicine,
   fuzzyLogicSearch,
-};
+}
+

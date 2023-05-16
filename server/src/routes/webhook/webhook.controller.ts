@@ -1,14 +1,15 @@
-const { checkCondition } = require("../../utils/checkCondition");
-const { handleText, handleListReply , handleLocationReply, handleButtonReply, handleImageReply} = require("../../utils/sendResponse");
-const {
-  getLocationDetails,
-  getImageDetails,
+import {checkCondition} from  "../../utils/checkCondition"
+import { handleText, handleListReply , handleLocationReply, handleButtonReply, handleImageReply} from "../../utils/sendResponse";
+import {
   getTextDetails,
+  getImageDetails,
+  getLocationDetails,
   getReplies,
-} = require("../../utils/getMessageDetails");
-const { getUser } = require("../../models/users.model");
+} from "../../utils/getMessageDetails";
+import { getUser } from "../../models/users.model";
+import { Request, Response } from 'express'
 
-function verifyToken(req, res) {
+export function verifyToken(req:Request, res:Response) {
   if (
     req.query["hub.mode"] == "subscribe" &&
     req.query["hub.verify_token"] == "theye"
@@ -19,7 +20,7 @@ function verifyToken(req, res) {
   }
 }
 
-async function hookMessage(req, res) {
+export async function hookMessage(req:Request, res:Response) {
 
   if (req.body.object) {
 
@@ -29,11 +30,11 @@ async function hookMessage(req, res) {
         const textDetails = getTextDetails(req);
         const user = await getUser(textDetails);
         console.log(user);
-        await handleText(textDetails, user.stage);
+        await handleText(textDetails, user && user.stage);
         break;
 
       case "image":
-        const imageDetails = getImageDetails(req);
+        const imageDetails = await getImageDetails(req);
         await handleImageReply(imageDetails);
         break;
 
@@ -79,7 +80,8 @@ async function hookMessage(req, res) {
   }
 }
 
-module.exports = {
-  verifyToken,
-  hookMessage,
-};
+
+export default {
+   verifyToken,
+   hookMessage,
+}

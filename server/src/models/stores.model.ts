@@ -1,4 +1,4 @@
-var axios = require('axios');
+import axios from 'axios';
 
 
 let stores = [
@@ -55,7 +55,7 @@ async function getDistance(origin:number[], destination:number[]) {
     return dist;
 }
 
-async function getStores(userDetails:UserDetails) {
+export async function getStores(userDetails:UserDetails) {
     
     const origin = [userDetails.latitude, userDetails.longitude];
     
@@ -74,7 +74,8 @@ async function getStores(userDetails:UserDetails) {
     return newStores;
 }
 
-module.exports = {
+
+export default{
     stores,
-    getStores
+    getStores,
 }

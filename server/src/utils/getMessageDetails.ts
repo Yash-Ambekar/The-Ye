@@ -1,6 +1,7 @@
-var axios = require('axios')
+import axios from 'axios'
+import {Request} from 'express';
 
-function getTextDetails(req) {
+export function getTextDetails(req: Request) {
   const phone_number_id =
     req.body.entry[0].changes[0].value.metadata.phone_number_id; // extract the phone number from the webhook payload
   const from = req.body.entry[0].changes[0].value.contacts[0].wa_id;
@@ -24,7 +25,7 @@ function getTextDetails(req) {
   };
 }
 
-function getImageDetails(req) {
+export async function getImageDetails(req: Request) {
   const from = req.body.entry[0].changes[0].value.contacts[0].wa_id;
   const name = req.body.entry[0].changes[0].value.contacts[0].profile.name
   const image_id = req.body.entry[0].changes[0].value.messages[0].image.id;
@@ -48,7 +49,7 @@ function getImageDetails(req) {
   };
 }
 
-async function getLocationDetails(req) {
+export async function getLocationDetails(req: Request) {
   const from = req.body.entry[0].changes[0].value.contacts[0].wa_id;
   // const address = req.body.entry[0].changes[0].value.messages[0].location.address;
   const lat = req.body.entry[0].changes[0].value.messages[0].location.latitude;
@@ -59,7 +60,7 @@ async function getLocationDetails(req) {
   const url = ('https://maps.googleapis.com/maps/api/distancematrix/json?' + new URLSearchParams({
     origins: orign_req,
     destinations: orign_req,
-    key: process.env['GOOGLE_MAPS_API_KEY']
+    key: process.env['GOOGLE_MAPS_API_KEY'] ?? ""
   }));
 
   var config = {
@@ -85,12 +86,12 @@ async function getLocationDetails(req) {
     type: "location",
     sender: from,
     address: address,
-    Latitude: lat,
-    Longitude: long,
+    latitude: lat,
+    longitude: long,
   };
 }
 
-function getReplies(req) {
+export function getReplies(req : Request) {
   const from = req.body.entry[0].changes[0].value.contacts[0].wa_id;
   const name = req.body.entry[0].changes[0].value.contacts[0].profile.name;
   let body = "";
@@ -122,9 +123,9 @@ function getReplies(req) {
 }
 
 
-module.exports = {
+export default {
   getTextDetails,
   getImageDetails,
   getLocationDetails,
   getReplies,
-};
+}

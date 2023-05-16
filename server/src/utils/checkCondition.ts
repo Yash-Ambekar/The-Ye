@@ -1,4 +1,6 @@
-function checkCondition(req) {
+import { Request } from 'express';
+
+export function checkCondition(req: Request) {
   if (
     req.body.entry &&
     req.body.entry[0].changes &&
@@ -14,4 +16,3 @@ function checkCondition(req) {
   return null;
 }
 
-module.exports = { checkCondition };

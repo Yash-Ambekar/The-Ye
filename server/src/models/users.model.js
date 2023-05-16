@@ -47,15 +47,26 @@ function addUser(user) {
 }
 
 async function getUser(userDetails) {
-  if (!userDetails.sender) return null;
-  let userDetailsWithStage = "";
-  users?.map((user) => {
+  let userDetailsWithStage = {
+    phone_number: "",
+    name: "",
+    stage: 0,
+    medicine: "",
+    totalNumberOfMeds: 0,
+    latitude: 0,
+    longitude: 0,
+    currLocation: "",
+    messageID: "",
+  };
+  if (!userDetails.sender) return userDetailsWithStage;
+
+  await Promise.all(users?.map((user) => {
     if (checkUser(user, userDetails)) {
       userDetailsWithStage = user;
     }
-  });
+  }));
 
-  if (!userDetailsWithStage) {
+  if (userDetailsWithStage.stage === 0) {
     const newUser = addUser(userDetails);
     return newUser;
   }
@@ -76,8 +87,8 @@ function changeDetails(userDetails, replyDetails) {
         }
 
         if (replyDetails?.type && replyDetails?.type === "location") {
-          user.latitude = replyDetails.Latitude;
-          user.longitude = replyDetails.Longitude;
+          user.latitude = replyDetails.latitude;
+          user.longitude = replyDetails.longitude;
           user.currLocation = replyDetails.address;
         }
         if (replyDetails && replyDetails?.replyType && replyDetails?.replyType === "button-reply"

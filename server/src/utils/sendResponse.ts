@@ -1,15 +1,30 @@
-const { fuzzyLogicSearch } = require(".././models/medicine.model");
-const { changeDetails, getUser } = require("../models/users.model");
-const { getStores } = require("../models/stores.model");
+import { fuzzyLogicSearch } from ".././models/medicine.model";
+import { changeDetails, getUser } from "../models/users.model";
+import { getStores } from "../models/stores.model";
 
-async function sendPossibleName(medName, possibleMed, phoneNumber) {
+
+interface possibleMed {
+  [index: string]: string | number;
+  top1: string;
+  top2: string;
+  top3: string;
+  score: number;
+}
+
+
+export async function sendPossibleName(
+  medName: string,
+  possibleMed: possibleMed,
+  phoneNumber: string
+) {
   const row = [];
-  for (let i = 0; i < 3; i++) {
-    if (possibleMed[i]) {
+  for (let i = 1; i < 4; i++) {
+    if (possibleMed["top" + i]) {
+      const topValue = possibleMed["top" + i] as string;
       row.push({
         id: `SECTION_1_ROW_${i}_ID`,
-        title: `${possibleMed[i].split(" ").slice(0, 1).join(" ")}` || "None",
-        description: `${possibleMed[i]}` || "",
+        title: `${topValue.split(" ").slice(0, 1).join(" ")}` || "None",
+        description: `${topValue}` || "",
       });
     }
   }
@@ -59,9 +74,8 @@ Please click on a possible correct medicine name and then click on send`,
   console.log(response.status);
 }
 
-async function sendText(phoneNumber, text) {
-  const helloText =
-    `Hello 👋! Please type in the name of the medicine you need. If you're not sure about the spelling, just type in a few letters and we'll suggest some options for you.
+export async function sendText(phoneNumber: string, text: string) {
+  const helloText = `Hello 👋! Please type in the name of the medicine you need. If you're not sure about the spelling, just type in a few letters and we'll suggest some options for you.
 
 You can also send us a photo of your prescription. To do this, tap on the paperclip icon below and select 'Camera'📷 or 'Gallery'. We'll review it and get back to you soon. Thanks! ✌️`;
   const response = await fetch(
@@ -88,7 +102,7 @@ You can also send us a photo of your prescription. To do this, tap on the paperc
   console.log(response.status);
 }
 
-async function sendConfirmation(userDetails) {
+export async function sendConfirmation(userDetails: UserDetails) {
   const response = await fetch(
     `https://graph.facebook.com/v16.0/${process.env["WHATSAPP_PHONE_NUMBER_ID"]}/messages`,
     {
@@ -137,11 +151,11 @@ ${userDetails.medicine ? userDetails.medicine : ""}
   console.log(response.status);
 }
 
-async function sendRequestToSingleStore(
-  patientsPhoneNumber,
-  storePhoneNumber,
-  medicine,
-  location
+export async function sendRequestToSingleStore(
+  patientsPhoneNumber: string,
+  storePhoneNumber: string,
+  medicine: string,
+  location: string
 ) {
   const response = await fetch(
     `https://graph.facebook.com/v16.0/${process.env["WHATSAPP_PHONE_NUMBER_ID"]}/messages`,
@@ -191,9 +205,9 @@ async function sendRequestToSingleStore(
   console.log(response.status);
 }
 
-async function sendImageToStore(
-  storePhoneNumber,
-  imageID
+export async function sendImageToStore(
+  storePhoneNumber: string,
+  imageID: string
 ) {
   const response = await fetch(
     `https://graph.facebook.com/v16.0/${process.env["WHATSAPP_PHONE_NUMBER_ID"]}/messages`,
@@ -204,13 +218,13 @@ async function sendImageToStore(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        "messaging_product": "whatsapp",
-        "recipient_type": "individual",
-        "to": storePhoneNumber,
-        "type": "image",
-        "image": {
-          "id": imageID
-        }
+        messaging_product: "whatsapp",
+        recipient_type: "individual",
+        to: storePhoneNumber,
+        type: "image",
+        image: {
+          id: imageID,
+        },
       }),
     }
   );
@@ -218,20 +232,20 @@ async function sendImageToStore(
   console.log(response.status);
 }
 
-async function sendImageToStores(imageID) {
+export async function sendImageToStores(
+  imageID: string,
+  userDetails: UserDetails
+) {
   const stores = await getStores(userDetails);
   await Promise.all(
     stores?.map(async (store) => {
-      await sendImageToStore(
-        store.storePhoneNumber,
-        imageID
-      );
+      await sendImageToStore(store.storePhoneNumber, imageID);
     })
   );
 }
 // Sending Patients Medicine Request to the Stores
 
-async function sendToStores(userDetails) {
+export async function sendToStores(userDetails: UserDetails) {
   const stores = await getStores(userDetails);
   await Promise.all(
     stores?.map(async (store) => {
@@ -245,50 +259,62 @@ async function sendToStores(userDetails) {
   );
 }
 
-async function handleText(userDetails, stage) {
+export async function handleText(
+  textDetails: textDetails,
+  stage: number | null
+) {
   switch (stage) {
     case 0:
-      await sendText(userDetails.sender);
-      changeDetails(userDetails);
+      await sendText(textDetails.sender, "");
+      changeDetails(textDetails);
       break;
     case 1:
-      const med = await fuzzyLogicSearch(userDetails.msg);
-      await sendPossibleName(userDetails.msg, med, userDetails.sender);
+      const med = await fuzzyLogicSearch(textDetails.msg);
+      await sendPossibleName(textDetails.msg, med, textDetails.sender);
       break;
   }
 }
 
-async function handleListReply(replyDetails, userDetails) {
+export async function handleListReply(
+  replyDetails: replyDetails,
+  userDetails: UserDetails
+) {
   changeDetails(userDetails, replyDetails);
   const text = `Please send your current location by following these instructions:
   
 ➥Attachments 📎  
 ➥Location 📍
 ➥Switch on Location Services ⚙️
-➥Send Current Location`
+➥Send Current Location`;
   await sendText(userDetails.phone_number, text);
 }
 
-async function handleButtonReply(replyDetails, userDetails) {
+export async function handleButtonReply(
+  replyDetails: replyDetails,
+  userDetails: UserDetails
+) {
   await sendToStores(userDetails);
   changeDetails(userDetails, replyDetails);
 }
 
-async function handleImageReply(imageDetails) {
+export async function handleImageReply(imageDetails: imageDetails) {
   const imageID = imageDetails.imageID;
   const sender = imageDetails.sender;
   const caption = imageDetails.caption;
-  const userDetails = getUser(imageDetails);
-  await sendImageToStores(imageID);
+  const userDetails = await getUser(imageDetails);
+  await sendImageToStores(imageID, userDetails);
   await sendToStores(userDetails);
 }
 
-async function handleLocationReply(userDetails, locationDetails) {
-  changeDetails(userDetails, locationDetails)
+export async function handleLocationReply(
+  userDetails: UserDetails,
+  locationDetails: locationDetails
+) {
+  changeDetails(userDetails, locationDetails);
   await sendConfirmation(userDetails);
 }
 
-module.exports = {
+export default {
   sendText,
   sendPossibleName,
   sendConfirmation,
@@ -298,5 +324,5 @@ module.exports = {
   handleListReply,
   handleButtonReply,
   handleImageReply,
-  handleLocationReply
+  handleLocationReply,
 };
