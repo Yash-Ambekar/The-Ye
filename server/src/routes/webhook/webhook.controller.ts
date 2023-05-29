@@ -1,5 +1,10 @@
-import {checkCondition} from  "../../utils/checkCondition"
-import { handleText, handleListReply , handleLocationReply, handleButtonReply, handleImageReply} from "../../utils/sendResponse";
+import { checkCondition } from "../../utils/checkCondition";
+import {
+  handleText,
+  handleLocationReply,
+  handleImageReply,
+  handleInteractiveMessages,
+} from "../../utils/sendResponse";
 import {
   getTextDetails,
   getImageDetails,
@@ -7,9 +12,12 @@ import {
   getReplies,
 } from "../../utils/getMessageDetails";
 import { getUser } from "../../models/users.model";
-import { Request, Response } from 'express'
+import { Request, Response } from "express";
 
-export function verifyToken(req:Request, res:Response) {
+
+
+//Verifying the secret token sent by Facebook server
+export function verifyToken(req: Request, res: Response) {
   if (
     req.query["hub.mode"] == "subscribe" &&
     req.query["hub.verify_token"] == "theye"
@@ -20,15 +28,14 @@ export function verifyToken(req:Request, res:Response) {
   }
 }
 
-export async function hookMessage(req:Request, res:Response) {
 
+//Handles Whatsapp messages sent by client
+export async function hookMessage(req: Request, res: Response) {
   if (req.body.object) {
-
     switch (checkCondition(req)) {
-
-      case "text": 
+      case "text":
         const textDetails = getTextDetails(req);
-        const user = await getUser(textDetails);
+        const user = await getUser(textDetails.phone_number, textDetails.name);
         console.log(user);
         await handleText(textDetails, user && user.stage);
         break;
@@ -40,39 +47,14 @@ export async function hookMessage(req:Request, res:Response) {
 
       case "location":
         const locationDetails = await getLocationDetails(req);
-        console.log(req.body.entry[0].changes[0].value.messages[0].location)
-        const userDetails = await getUser(locationDetails);
-        await handleLocationReply(userDetails, locationDetails)
+        console.log(req.body.entry[0].changes[0].value.messages[0].location);
+        const userDetails = await getUser(locationDetails.phone_number, locationDetails.name);
+        await handleLocationReply(userDetails, locationDetails);
         break;
 
       case "interactive":
         const replyDetails = getReplies(req);
-        if (
-          replyDetails.reply &&
-          replyDetails.reply !== "None" &&
-          replyDetails.replyType === "description"
-        ){
-          const user = await getUser(replyDetails)
-          console.log(user)
-          handleListReply(replyDetails, user);
-
-        }
-        else if (
-          replyDetails.reply &&
-          replyDetails.reply === "Confirm" &&
-          replyDetails.replyType === "button-reply"
-        ){
-          const user = await getUser(replyDetails)
-          console.log(user)
-          handleButtonReply(replyDetails, user);
-        } 
-        else if (
-          replyDetails.reply &&
-          replyDetails.reply === "Accept" &&
-          replyDetails.replyType === "button-reply"
-        ){
-
-        }
+        await handleInteractiveMessages(replyDetails);
         break;
     }
 
@@ -80,8 +62,7 @@ export async function hookMessage(req:Request, res:Response) {
   }
 }
 
-
 export default {
-   verifyToken,
-   hookMessage,
-}
+  verifyToken,
+  hookMessage,
+};

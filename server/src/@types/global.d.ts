@@ -1,52 +1,61 @@
 declare global {
   interface Stores {
     storeID: number;
-    StoreName: string;
+    storeName: string;
     lat: number;
     long: number;
     storePhoneNumber: string;
-  };
+  }
 
-  interface UserDetails  {
+  interface UserDetails {
     phone_number: string;
     name: string;
     stage: number;
     medicine: string;
     totalNumberOfMeds: number;
-    latitude: number;
-    longitude: number;
+    latitude: number | null;
+    longitude: number | null;
     currLocation: string;
-    messageID: string;
-  };
-
-  interface textDetails{
-    name: string,
-    phone_id: string,
-    sender: string,
-    msg: string,
+    messageID: string | null;
   }
 
-  interface imageDetails{
-      name: string;
-      sender: string;
-      imageID: string;
-      caption: string;
-  
+  interface textDetails {
+    name: string;
+    phone_id: string;
+    phone_number: string;
+    msg: string;
   }
 
-  interface locationDetails{
-    type: string;
-    sender: string;
+  interface imageDetails {
+    name: string;
+    phone_number: string;
+    imageID: string;
+    caption: string;
+  }
+
+  interface locationDetails {
+    name: string
+    replyType: string;
+    phone_number: string;
     address: string;
     latitude: number;
     longitude: number;
   }
 
-  interface replyDetails{
+  interface replyDetails {
     name: string;
-    sender: string;
+    phone_number: string;
     reply: string;
     replyType: string;
+  }
+
+  type changeDetailsReply = {
+    replyType: string;
+    reply:string;
+    latitude:number ;
+    longitude:number;
+    messageID: string;
+    address:string;
   }
 }
 

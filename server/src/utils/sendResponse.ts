@@ -1,5 +1,5 @@
 import { fuzzyLogicSearch } from ".././models/medicine.model";
-import { changeDetails, getUser } from "../models/users.model";
+import { changeDetailsUsingLocation, changeDetailsUsingReply, getUser } from "../models/users.model";
 import { getStores } from "../models/stores.model";
 
 
@@ -265,12 +265,12 @@ export async function handleText(
 ) {
   switch (stage) {
     case 0:
-      await sendText(textDetails.sender, "");
-      changeDetails(textDetails);
+      await sendText(textDetails.phone_number, "");
+      changeDetailsUsingReply(textDetails.phone_number, {} as replyDetails);
       break;
     case 1:
       const med = await fuzzyLogicSearch(textDetails.msg);
-      await sendPossibleName(textDetails.msg, med, textDetails.sender);
+      await sendPossibleName(textDetails.msg, med, textDetails.phone_number);
       break;
   }
 }
@@ -279,7 +279,7 @@ export async function handleListReply(
   replyDetails: replyDetails,
   userDetails: UserDetails
 ) {
-  changeDetails(userDetails, replyDetails);
+  changeDetailsUsingReply(userDetails.phone_number, replyDetails);
   const text = `Please send your current location by following these instructions:
   
 ➥Attachments 📎  
@@ -294,14 +294,14 @@ export async function handleButtonReply(
   userDetails: UserDetails
 ) {
   await sendToStores(userDetails);
-  changeDetails(userDetails, replyDetails);
+  changeDetailsUsingReply(userDetails.phone_number, replyDetails);
 }
 
 export async function handleImageReply(imageDetails: imageDetails) {
   const imageID = imageDetails.imageID;
-  const sender = imageDetails.sender;
+  const sender = imageDetails.phone_number;
   const caption = imageDetails.caption;
-  const userDetails = await getUser(imageDetails);
+  const userDetails = await getUser(imageDetails.phone_number, imageDetails.name);
   await sendImageToStores(imageID, userDetails);
   await sendToStores(userDetails);
 }
@@ -310,8 +310,37 @@ export async function handleLocationReply(
   userDetails: UserDetails,
   locationDetails: locationDetails
 ) {
-  changeDetails(userDetails, locationDetails);
+  changeDetailsUsingLocation(userDetails.phone_number, locationDetails);
   await sendConfirmation(userDetails);
+}
+
+export async function handleInteractiveMessages(replyDetails:replyDetails){
+  if (
+    replyDetails.reply &&
+    replyDetails.reply !== "None" &&
+    replyDetails.replyType === "description"
+  ){
+    const user = await getUser(replyDetails.phone_number, replyDetails.name);
+    console.log(user)
+    handleListReply(replyDetails, user);
+
+  }
+  else if (
+    replyDetails.reply &&
+    replyDetails.reply === "Confirm" &&
+    replyDetails.replyType === "button-reply"
+  ){
+    const user = await getUser(replyDetails.phone_number, replyDetails.name);
+    console.log(user);
+    handleButtonReply(replyDetails, user);
+  } 
+  else if (
+    replyDetails.reply &&
+    replyDetails.reply === "Accept" &&
+    replyDetails.replyType === "button-reply"
+  ){
+
+  }
 }
 
 export default {
@@ -325,4 +354,5 @@ export default {
   handleButtonReply,
   handleImageReply,
   handleLocationReply,
+  handleInteractiveMessages,
 };

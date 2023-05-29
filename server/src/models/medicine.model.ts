@@ -54,14 +54,8 @@ function cosineSimilarity(str1: string, str2: string) {
 
 export async function fuzzyLogicSearch(medicineName:string) {
   const firstLetter = medicineName.toUpperCase().charAt(0);
-  // const Fuse = require("fuse.js");
 
-  // Create an array of medicine names to search through
-  // const medicineNames = await import("../models/data.json", {
-  //   assert: { type: "json" },
-  // });
-
-  const medicineNames = await readJsonFile("./src/models/data.json");
+  const medicineNames = await readJsonFile("./src/data/data.json");
   // Set up the options for the Fuse.js search
   const options = {
     shouldSort: true,
@@ -106,7 +100,7 @@ export async function fuzzyLogicSearch(medicineName:string) {
 
 export async function getMedicine(medicineName:string) {
   if(medicineName === "") return null;
-  const medicines = await readJsonFile("./src/models/data.json");
+  const medicines = await readJsonFile("./src/data/data.json");
   const firstLetter = medicineName.toUpperCase().charAt(0);
   console.log(firstLetter);
 

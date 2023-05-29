@@ -20,7 +20,7 @@ export function getTextDetails(req: Request) {
   return {
     name: name,
     phone_id: phone_number_id,
-    sender: from,
+    phone_number: from,
     msg: msg_body,
   };
 }
@@ -43,7 +43,7 @@ export async function getImageDetails(req: Request) {
 
   return {
     name: name,
-    sender: from,
+    phone_number: from,
     imageID: image_id,
     caption: image_caption,
   };
@@ -51,6 +51,7 @@ export async function getImageDetails(req: Request) {
 
 export async function getLocationDetails(req: Request) {
   const from = req.body.entry[0].changes[0].value.contacts[0].wa_id;
+  const name = req.body.entry[0].changes[0].value.contacts[0].profile.name
   // const address = req.body.entry[0].changes[0].value.messages[0].location.address;
   const lat = req.body.entry[0].changes[0].value.messages[0].location.latitude;
   const long = req.body.entry[0].changes[0].value.messages[0].location.longitude;
@@ -75,7 +76,8 @@ export async function getLocationDetails(req: Request) {
   console.log(
     "Location Details:",
     JSON.stringify({
-      sender: from,
+      name:name,
+      phone_number: from,
       address: address,
       Latitude: lat,
       Longitude: long,
@@ -83,8 +85,9 @@ export async function getLocationDetails(req: Request) {
   );
 
   return {
-    type: "location",
-    sender: from,
+    replyType: "location",
+    name:name,
+    phone_number: from,
     address: address,
     latitude: lat,
     longitude: long,
@@ -108,7 +111,7 @@ export function getReplies(req : Request) {
     "Reply Details:",
     JSON.stringify({
       name: name,
-      sender: from,
+      phone_number: from,
       reply: body,
       replyType: type,
     })
@@ -116,7 +119,7 @@ export function getReplies(req : Request) {
 
   return {
     name: name,
-    sender: from,
+    phone_number: from,
     reply: body,
     replyType: type,
   };
