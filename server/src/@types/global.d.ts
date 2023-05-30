@@ -11,12 +11,12 @@ declare global {
     phone_number: string;
     name: string;
     stage: number;
-    medicine: string;
+    medicine: string ;
     totalNumberOfMeds: number;
-    latitude: number | null;
-    longitude: number | null;
+    latitude: number ;
+    longitude: number ;
     currLocation: string;
-    messageID: string | null;
+    messageID: string ;
   }
 
   interface textDetails {

@@ -1,150 +1,194 @@
 import { userModel } from "./users.mongo";
 
-let users = [
-  {
-    phone_number: "",
-    name: "",
-    stage: 0,
-    medicine: "",
-    totalNumberOfMeds: 0,
-    latitude: 0,
-    longitude: 0,
-    currLocation: "",
-    messageID: "",
-  },
-];
-
-type combinedTypes =
-  | replyDetails
-  | textDetails
-  | locationDetails
-  | imageDetails;
-
-function checkUser(userdbPhoneNumber: string, userPhoneNumber: string) {
-  if (
-    userdbPhoneNumber &&
-    userPhoneNumber &&
-    userdbPhoneNumber === userPhoneNumber
-  )
-    return true;
-  return false;
-}
-
-function addUser(phone_number: string, name: string) {
-  if (phone_number) {
-    users.push({
-      phone_number: phone_number,
-      name: name,
-      stage: 0,
-      medicine: "",
-      totalNumberOfMeds: 0,
-      latitude: 0,
-      longitude: 0,
-      currLocation: "",
-      messageID: "",
+async function checkUser(userPhoneNumber: string, userName: string) {
+  try {
+    const userInBSON = await userModel.countDocuments({
+      phone_number: userPhoneNumber,
+      name:userName,
     });
+    return userInBSON;
+  } catch (err) {
+    console.log(err);
+    return false;
   }
-
-  return {
-    phone_number: phone_number,
-    name: name,
-    stage: 0,
-    medicine: "",
-    latitude: 0,
-    longitude: 0,
-    totalNumberOfMeds: 0,
-    currLocation: "",
-    messageID: "",
-  };
 }
 
 export async function getUser(userPhoneNumber: string, userName: string) {
-  let userDetailsWithStage = {
-    phone_number: "",
-    name: "",
-    stage: 0,
-    medicine: "",
-    totalNumberOfMeds: 0,
-    latitude: 0,
-    longitude: 0,
-    currLocation: "",
-    messageID: "",
-  };
-  if (!userPhoneNumber) return userDetailsWithStage;
-
-  await Promise.all(
-    users?.map((user) => {
-      if (checkUser(user.phone_number, userPhoneNumber)) {
-        userDetailsWithStage = user;
-      }
+  
+  try{
+    const userInBSON = await userModel.findOne({
+      phone_number: userPhoneNumber,
+      name: userName,
     })
-  );
+    const user = await userInBSON?.toObject() as UserDetails;
+  
+    if(!user){
+      const userDetails = {
+        phone_number: userPhoneNumber,
+        name: userName,
+        stage: 0,
+        medicine: "",
+        totalNumberOfMeds: 0,
+        latitude: 0,
+        longitude: 0,
+        currLocation: "",
+        messageID: "",
+      };
+    
+      try {
+        const userInBSON = await userModel.findOneAndUpdate(
+          {
+            phone_number: userPhoneNumber,
+            name: userName,
+          },
+          userDetails,
+          {
+            upsert: true,
+            returnDocument: "after",
+          }
+        );
+        const user = userInBSON?.toObject() as UserDetails;
+        console.log(user);
+        return user;
+      } catch (err) {
+        console.error(err);
+        return {} as UserDetails;
+      }
+  
+    }
+  
+    return user;
 
-  if (userDetailsWithStage.stage === 0) {
-    const newUser = addUser(userPhoneNumber, userName);
-    return newUser;
+  }catch(err){
+    console.log(`Something went wrong ${err}`);
+    return {} as UserDetails
   }
-  return userDetailsWithStage;
+
 }
 
-export function changeDetailsUsingLocation(
+export async function updateUser(
+  userPhoneNumber: string,
+  updateDetail: UserDetails
+) {
+  const userInBSON = await userModel.findOneAndUpdate(
+    {
+      phone_number: userPhoneNumber,
+    },
+    updateDetail,
+    {
+      upsert: true,
+      returnDocument: "after",
+    }
+  );
+  const updatedUser = userInBSON.toObject() as UserDetails;
+  return updatedUser;
+}
+
+export async function changeDetailsUsingLocation(
   userPhoneNumber: string,
   replyDetails: locationDetails
 ) {
-  users?.map((user) => {
-    if (checkUser(user.phone_number, userPhoneNumber)) {
-      if (user.stage < 3) {
-        if (replyDetails?.replyType && replyDetails?.replyType === "location") {
-          user.latitude = replyDetails.latitude;
-          user.longitude = replyDetails.longitude;
-          user.currLocation = replyDetails.address;
-        } 
-        if (user.totalNumberOfMeds === 0) user.stage = user.stage + 1;
-        else user.totalNumberOfMeds = user.totalNumberOfMeds - 1;
-        // console.log(user);
-        return user;
-      } else {
-        console.log("User stage to 0");
-        user.stage = 0;
-        user.medicine = "";
-        user.totalNumberOfMeds = 0;
-        return user;
+  if ((await checkUser(userPhoneNumber, replyDetails.name)) === 1) {
+    const user = await getUser(userPhoneNumber, replyDetails.name);
+    if (user.stage < 3) {
+      if (replyDetails?.replyType && replyDetails?.replyType === "location") {
+        const updateDetails = {
+          latitude: replyDetails.latitude,
+          longitude: replyDetails.longitude,
+          currLocation: replyDetails.address,
+          stage: user.stage + 1,
+        };
+        const updatedUser = await updateUser(
+          userPhoneNumber,
+          updateDetails as UserDetails
+        );
+        return updatedUser;
       }
+      if (user.totalNumberOfMeds === 0) {
+        await updateUser(userPhoneNumber, {
+          stage: user.stage + 1,
+        } as UserDetails);
+      } else {
+        await updateUser(userPhoneNumber, {
+          totalNumberOfMeds: user.totalNumberOfMeds - 1,
+        } as UserDetails);
+      }
+    } else {
+      const updateDetails = {
+        stage: 0,
+        medicine: "",
+        totalNumberOfMeds: 0,
+      };
+      const updatedUser = await updateUser(
+        userPhoneNumber,
+        updateDetails as UserDetails
+      );
+      console.log("User stage to 0\n ", updatedUser);
+      return updatedUser;
     }
-  });
+  } else {
+    console.error("Multiple Users Found or no user found");
+  }
 }
 
-export function changeDetailsUsingReply(
+export async function changeDetailsUsingReply(
   userPhoneNumber: string,
   replyDetails: replyDetails
 ) {
-  users?.map((user) => {
-    if (checkUser(user.phone_number, userPhoneNumber)) {
-      if (user.stage < 3) {
-        if (
-          replyDetails &&
-          replyDetails?.replyType &&
-          replyDetails?.replyType === "description"
-        ) {
-          if (user.medicine == "") {
-            user.medicine = replyDetails?.reply;
-          } else {
-            user.medicine = user.medicine + ", " + replyDetails.reply;
-          }
-        } 
-        if (user.totalNumberOfMeds === 0) user.stage = user.stage + 1;
-        else user.totalNumberOfMeds = user.totalNumberOfMeds - 1;
-        // console.log(user);
-        return user;
-      } else {
-        console.log("User stage to 0");
-        user.stage = 0;
-        user.medicine = "";
-        user.totalNumberOfMeds = 0;
-        return user;
+  if ((await checkUser(userPhoneNumber, replyDetails.name)) === 1) {
+    const user = await getUser(userPhoneNumber, replyDetails.name);
+    if (user.stage < 3) {
+      if (
+        replyDetails &&
+        replyDetails?.replyType &&
+        replyDetails?.replyType === "description"
+      ) {
+        if (user.medicine == "") {
+          const updateDetails = {
+            medicine: replyDetails?.reply,
+            stage: user.stage + 1,
+          };
+          const updatedUser = await updateUser(
+            userPhoneNumber,
+            updateDetails as UserDetails
+          );
+          return updatedUser;
+        } else {
+          const updateDetails = {
+            medicine: user.medicine + ", " + replyDetails.reply,
+          };
+          const updatedUser = await updateUser(
+            userPhoneNumber,
+            updateDetails as UserDetails
+          );
+          return updatedUser;
+        }
       }
+      if (user.totalNumberOfMeds === 0) {
+        await updateUser(userPhoneNumber, {
+          stage: user.stage + 1,
+        } as UserDetails);
+      } else {
+        await updateUser(userPhoneNumber, {
+          totalNumberOfMeds: user.totalNumberOfMeds - 1,
+        } as UserDetails);
+      }
+    } else {
+      const updateDetails = {
+        stage: 0,
+        medicine: "",
+        totalNumberOfMeds: 0,
+      };
+      const updatedUser = await updateUser(
+        userPhoneNumber,
+        updateDetails as UserDetails
+      );
+      console.log("User stage to 0\n ", updatedUser);
+      return updatedUser;
     }
-  });
+  } else {
+    console.error("Multiple Users Found or no user found");
+  }
 }
 
 export default {

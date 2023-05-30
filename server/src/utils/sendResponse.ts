@@ -259,6 +259,35 @@ export async function sendToStores(userDetails: UserDetails) {
   );
 }
 
+async function sendError(userPhoneNumber:string){
+  const errorText = `❌ ERROR
+Please follow the instruction and reply accordingly as it helps us process your request to the best of our ability`;
+  const response = await fetch(
+    `https://graph.facebook.com/v16.0/${process.env["WHATSAPP_PHONE_NUMBER_ID"]}/messages`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env["WHATSAPP_TOKEN"]}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        recipient_type: "individual",
+        to: `${userPhoneNumber}`,
+        type: "text",
+        text: {
+          preview_url: false,
+          body: errorText,
+        },
+      }),
+    }
+  );
+
+  console.log(response.status);
+}
+
+
+
 export async function handleText(
   textDetails: textDetails,
   stage: number | null
@@ -266,12 +295,14 @@ export async function handleText(
   switch (stage) {
     case 0:
       await sendText(textDetails.phone_number, "");
-      changeDetailsUsingReply(textDetails.phone_number, {} as replyDetails);
+      changeDetailsUsingReply(textDetails.phone_number, {name: textDetails.name} as replyDetails);
       break;
     case 1:
       const med = await fuzzyLogicSearch(textDetails.msg);
       await sendPossibleName(textDetails.msg, med, textDetails.phone_number);
       break;
+    case 2 || 3: 
+        await sendError(textDetails.phone_number);
   }
 }
 
@@ -294,7 +325,7 @@ export async function handleButtonReply(
   userDetails: UserDetails
 ) {
   await sendToStores(userDetails);
-  changeDetailsUsingReply(userDetails.phone_number, replyDetails);
+  await changeDetailsUsingReply(userDetails.phone_number, replyDetails);
 }
 
 export async function handleImageReply(imageDetails: imageDetails) {
@@ -310,7 +341,7 @@ export async function handleLocationReply(
   userDetails: UserDetails,
   locationDetails: locationDetails
 ) {
-  changeDetailsUsingLocation(userDetails.phone_number, locationDetails);
+  await changeDetailsUsingLocation(userDetails.phone_number, locationDetails);
   await sendConfirmation(userDetails);
 }
 
