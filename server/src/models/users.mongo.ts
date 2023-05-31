@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema({
     totalNumberOfMeds: Number,
     latitude: Number,
     longitude: Number,
-    currLocation: [String],
+    currLocation: String,
     messageID: String,
 });
 

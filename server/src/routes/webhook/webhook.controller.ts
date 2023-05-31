@@ -36,7 +36,6 @@ export async function hookMessage(req: Request, res: Response) {
       case "text":
         const textDetails = getTextDetails(req);
         const user = await getUser(textDetails.phone_number, textDetails.name);
-        console.log(user);
         await handleText(textDetails, user && user.stage);
         break;
 

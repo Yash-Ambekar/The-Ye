@@ -47,8 +47,8 @@ export async function getUser(userPhoneNumber: string, userName: string) {
             returnDocument: "after",
           }
         );
-        const user = userInBSON?.toObject() as UserDetails;
-        console.log(user);
+        const user = await userInBSON?.toObject() as UserDetails;
+        console.log(`New User created \n ${JSON.stringify(user, null, 3)}`);
         return user;
       } catch (err) {
         console.error(err);
@@ -56,7 +56,7 @@ export async function getUser(userPhoneNumber: string, userName: string) {
       }
   
     }
-  
+    console.log(`getUser function call \n ${JSON.stringify(user, null, 3)}}`);
     return user;
 
   }catch(err){
@@ -80,7 +80,8 @@ export async function updateUser(
       returnDocument: "after",
     }
   );
-  const updatedUser = userInBSON.toObject() as UserDetails;
+  const updatedUser = await userInBSON.toObject() as UserDetails;
+  console.log(`updateUser function call \n ${JSON.stringify(updatedUser, null, 3)}`);
   return updatedUser;
 }
 
@@ -90,7 +91,7 @@ export async function changeDetailsUsingLocation(
 ) {
   if ((await checkUser(userPhoneNumber, replyDetails.name)) === 1) {
     const user = await getUser(userPhoneNumber, replyDetails.name);
-    if (user.stage < 3) {
+    if (user.stage < 4) {
       if (replyDetails?.replyType && replyDetails?.replyType === "location") {
         const updateDetails = {
           latitude: replyDetails.latitude,
@@ -103,15 +104,6 @@ export async function changeDetailsUsingLocation(
           updateDetails as UserDetails
         );
         return updatedUser;
-      }
-      if (user.totalNumberOfMeds === 0) {
-        await updateUser(userPhoneNumber, {
-          stage: user.stage + 1,
-        } as UserDetails);
-      } else {
-        await updateUser(userPhoneNumber, {
-          totalNumberOfMeds: user.totalNumberOfMeds - 1,
-        } as UserDetails);
       }
     } else {
       const updateDetails = {
@@ -137,7 +129,7 @@ export async function changeDetailsUsingReply(
 ) {
   if ((await checkUser(userPhoneNumber, replyDetails.name)) === 1) {
     const user = await getUser(userPhoneNumber, replyDetails.name);
-    if (user.stage < 3) {
+    if (user.stage < 4) {
       if (
         replyDetails &&
         replyDetails?.replyType &&

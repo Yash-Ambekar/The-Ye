@@ -123,7 +123,7 @@ export async function sendConfirmation(userDetails: UserDetails) {
 
 ${userDetails.medicine ? userDetails.medicine : ""}
 
-*Location*: ${userDetails.currLocation}`,
+*Location*: ${userDetails.currLocation ? userDetails.currLocation:""}`,
           },
           action: {
             buttons: [
@@ -295,14 +295,18 @@ export async function handleText(
   switch (stage) {
     case 0:
       await sendText(textDetails.phone_number, "");
-      changeDetailsUsingReply(textDetails.phone_number, {name: textDetails.name} as replyDetails);
+      await changeDetailsUsingReply(textDetails.phone_number, {name: textDetails.name} as replyDetails);
       break;
     case 1:
       const med = await fuzzyLogicSearch(textDetails.msg);
       await sendPossibleName(textDetails.msg, med, textDetails.phone_number);
+      await changeDetailsUsingReply(textDetails.phone_number, {name: textDetails.name} as replyDetails);
       break;
-    case 2 || 3: 
+    case 2:
+    case 3:
+    case 4: 
         await sendError(textDetails.phone_number);
+        break;
   }
 }
 
@@ -341,8 +345,8 @@ export async function handleLocationReply(
   userDetails: UserDetails,
   locationDetails: locationDetails
 ) {
-  await changeDetailsUsingLocation(userDetails.phone_number, locationDetails);
-  await sendConfirmation(userDetails);
+  const updatedUser = await changeDetailsUsingLocation(userDetails.phone_number, locationDetails);
+  await sendConfirmation(updatedUser as UserDetails);
 }
 
 export async function handleInteractiveMessages(replyDetails:replyDetails){
@@ -352,8 +356,7 @@ export async function handleInteractiveMessages(replyDetails:replyDetails){
     replyDetails.replyType === "description"
   ){
     const user = await getUser(replyDetails.phone_number, replyDetails.name);
-    console.log(user)
-    handleListReply(replyDetails, user);
+    await handleListReply(replyDetails, user);
 
   }
   else if (
@@ -362,8 +365,7 @@ export async function handleInteractiveMessages(replyDetails:replyDetails){
     replyDetails.replyType === "button-reply"
   ){
     const user = await getUser(replyDetails.phone_number, replyDetails.name);
-    console.log(user);
-    handleButtonReply(replyDetails, user);
+    await handleButtonReply(replyDetails, user);
   } 
   else if (
     replyDetails.reply &&

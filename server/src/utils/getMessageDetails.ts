@@ -70,7 +70,7 @@ export async function getLocationDetails(req: Request) {
   };
 
   const response = await axios(config);
-  const address = response.data.origin_addresses;
+  const address = response.data.origin_addresses[0];
 
 
   console.log(
