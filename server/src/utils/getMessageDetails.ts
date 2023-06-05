@@ -96,6 +96,7 @@ export async function getLocationDetails(req: Request) {
 
 export function getReplies(req : Request) {
   const from = req.body.entry[0].changes[0].value.contacts[0].wa_id;
+  const wamid = req.body.entry[0].changes[0].value.messages[0]?.context.id;
   const name = req.body.entry[0].changes[0].value.contacts[0].profile.name;
   let body = "";
   let type = "";
@@ -111,6 +112,7 @@ export function getReplies(req : Request) {
     "Reply Details:",
     JSON.stringify({
       name: name,
+      messageID: wamid,
       phone_number: from,
       reply: body,
       replyType: type,
@@ -122,6 +124,7 @@ export function getReplies(req : Request) {
     phone_number: from,
     reply: body,
     replyType: type,
+    contextMessageID: wamid
   };
 }
 

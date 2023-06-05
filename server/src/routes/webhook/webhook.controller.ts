@@ -4,7 +4,7 @@ import {
   handleLocationReply,
   handleImageReply,
   handleInteractiveMessages,
-} from "../../utils/sendResponse";
+} from "../../utils/handleMessages";
 import {
   getTextDetails,
   getImageDetails,
@@ -35,7 +35,7 @@ export async function hookMessage(req: Request, res: Response) {
     switch (checkCondition(req)) {
       case "text":
         const textDetails = getTextDetails(req);
-        const user = await getUser(textDetails.phone_number, textDetails.name);
+        const user = await getUser({phone_number: textDetails.phone_number, name: textDetails.name} as getUser);
         await handleText(textDetails, user && user.stage);
         break;
 
@@ -47,7 +47,7 @@ export async function hookMessage(req: Request, res: Response) {
       case "location":
         const locationDetails = await getLocationDetails(req);
         console.log(req.body.entry[0].changes[0].value.messages[0].location);
-        const userDetails = await getUser(locationDetails.phone_number, locationDetails.name);
+        const userDetails = await getUser({phone_number: locationDetails.phone_number, name: locationDetails.name} as getUser);
         await handleLocationReply(userDetails, locationDetails);
         break;
 

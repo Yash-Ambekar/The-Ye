@@ -1,4 +1,4 @@
-import { Request } from 'express';
+import { Request } from "express";
 
 export function checkCondition(req: Request) {
   if (
@@ -16,3 +16,26 @@ export function checkCondition(req: Request) {
   return null;
 }
 
+export function checkForReply(replyDetails: replyDetails) {
+  if (
+    replyDetails.reply &&
+    replyDetails.reply !== "None" &&
+    replyDetails.replyType === "description"
+  ) {
+    return "description";
+  } else if (
+    replyDetails.reply &&
+    replyDetails.reply === "Confirm" &&
+    replyDetails.replyType === "button-reply"
+  ) {
+    return "Confirm";
+  } else if (
+    replyDetails.reply &&
+    replyDetails.reply === "Show interest" &&
+    replyDetails.replyType === "button-reply"
+  ) {
+    return "Show interest";
+  }
+
+  return "";
+}

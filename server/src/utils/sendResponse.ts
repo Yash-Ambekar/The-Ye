@@ -1,7 +1,4 @@
-import { fuzzyLogicSearch } from ".././models/medicine.model";
-import { changeDetailsUsingLocation, changeDetailsUsingReply, getUser } from "../models/users.model";
 import { getStores } from "../models/stores.model";
-
 
 interface possibleMed {
   [index: string]: string | number;
@@ -10,7 +7,6 @@ interface possibleMed {
   top3: string;
   score: number;
 }
-
 
 export async function sendPossibleName(
   medName: string,
@@ -47,17 +43,10 @@ export async function sendPossibleName(
         type: "interactive",
         interactive: {
           type: "list",
-          //   "header": {
-          //     "type": "text",
-          //     "text": "Choose Medicine Name"
-          //   },
           body: {
             text: `*Choose* *the* *Medicine* *Name*
 Please click on a possible correct medicine name and then click on send`,
           },
-          //   "footer": {
-          //     "text": "FOOTER_TEXT"
-          //   },
           action: {
             button: medName ? `*${medName}*` : "None",
             sections: [
@@ -123,7 +112,7 @@ export async function sendConfirmation(userDetails: UserDetails) {
 
 ${userDetails.medicine ? userDetails.medicine : ""}
 
-*Location*: ${userDetails.currLocation ? userDetails.currLocation:""}`,
+*Location*: ${userDetails.currLocation ? userDetails.currLocation : ""}`,
           },
           action: {
             buttons: [
@@ -185,14 +174,7 @@ export async function sendRequestToSingleStore(
                 type: "reply",
                 reply: {
                   id: "UNIQUE_BUTTON_ID_1",
-                  title: "Accept",
-                },
-              },
-              {
-                type: "reply",
-                reply: {
-                  id: "UNIQUE_BUTTON_ID_2",
-                  title: "Reject",
+                  title: "Show interest",
                 },
               },
             ],
@@ -203,6 +185,9 @@ export async function sendRequestToSingleStore(
   );
 
   console.log(response.status);
+  const responseObject = await response.json();
+  console.log(responseObject);
+  return responseObject?.messages[0]?.id;
 }
 
 export async function sendImageToStore(
@@ -236,7 +221,19 @@ export async function sendImageToStores(
   imageID: string,
   userDetails: UserDetails
 ) {
-  const stores = await getStores(userDetails);
+  const stores = await getStores({
+    queryDetails: {
+      location: {
+        $near: {
+          $geometry: {
+            type: "Point",
+            coordinates: [userDetails.longitude, userDetails.latitude],
+          },
+          $maxDistance: 5000,
+        },
+      },
+    },
+  });
   await Promise.all(
     stores?.map(async (store) => {
       await sendImageToStore(store.storePhoneNumber, imageID);
@@ -246,20 +243,42 @@ export async function sendImageToStores(
 // Sending Patients Medicine Request to the Stores
 
 export async function sendToStores(userDetails: UserDetails) {
-  const stores = await getStores(userDetails);
+  const stores = await getStores({
+    queryDetails: {
+      location: {
+        $near: {
+          $geometry: {
+            type: "Point",
+            coordinates: [userDetails.longitude, userDetails.latitude],
+          },
+          $maxDistance: 5000,
+        },
+      },
+    },
+  } as getStore);
+  let messageDetails: Object[] = [];
   await Promise.all(
     stores?.map(async (store) => {
-      await sendRequestToSingleStore(
+      const messageID = await sendRequestToSingleStore(
         userDetails.phone_number,
         store.storePhoneNumber,
         userDetails.medicine,
         userDetails.currLocation
       );
+      messageDetails.push({
+        storeName: store.storeName,
+        storePhoneNumber: store.storePhoneNumber,
+        medicineName: userDetails.medicine,
+        currLocation: userDetails.currLocation,
+        messageID: messageID,
+      });
     })
   );
+
+  return messageDetails;
 }
 
-async function sendError(userPhoneNumber:string){
+export async function sendError(userPhoneNumber: string) {
   const errorText = `❌ ERROR
 Please follow the instruction and reply accordingly as it helps us process your request to the best of our ability`;
   const response = await fetch(
@@ -286,106 +305,11 @@ Please follow the instruction and reply accordingly as it helps us process your 
   console.log(response.status);
 }
 
-
-
-export async function handleText(
-  textDetails: textDetails,
-  stage: number | null
-) {
-  switch (stage) {
-    case 0:
-      await sendText(textDetails.phone_number, "");
-      await changeDetailsUsingReply(textDetails.phone_number, {name: textDetails.name} as replyDetails);
-      break;
-    case 1:
-      const med = await fuzzyLogicSearch(textDetails.msg);
-      await sendPossibleName(textDetails.msg, med, textDetails.phone_number);
-      await changeDetailsUsingReply(textDetails.phone_number, {name: textDetails.name} as replyDetails);
-      break;
-    case 2:
-    case 3:
-    case 4: 
-        await sendError(textDetails.phone_number);
-        break;
-  }
-}
-
-export async function handleListReply(
-  replyDetails: replyDetails,
-  userDetails: UserDetails
-) {
-  changeDetailsUsingReply(userDetails.phone_number, replyDetails);
-  const text = `Please send your current location by following these instructions:
-  
-➥Attachments 📎  
-➥Location 📍
-➥Switch on Location Services ⚙️
-➥Send Current Location`;
-  await sendText(userDetails.phone_number, text);
-}
-
-export async function handleButtonReply(
-  replyDetails: replyDetails,
-  userDetails: UserDetails
-) {
-  await sendToStores(userDetails);
-  await changeDetailsUsingReply(userDetails.phone_number, replyDetails);
-}
-
-export async function handleImageReply(imageDetails: imageDetails) {
-  const imageID = imageDetails.imageID;
-  const sender = imageDetails.phone_number;
-  const caption = imageDetails.caption;
-  const userDetails = await getUser(imageDetails.phone_number, imageDetails.name);
-  await sendImageToStores(imageID, userDetails);
-  await sendToStores(userDetails);
-}
-
-export async function handleLocationReply(
-  userDetails: UserDetails,
-  locationDetails: locationDetails
-) {
-  const updatedUser = await changeDetailsUsingLocation(userDetails.phone_number, locationDetails);
-  await sendConfirmation(updatedUser as UserDetails);
-}
-
-export async function handleInteractiveMessages(replyDetails:replyDetails){
-  if (
-    replyDetails.reply &&
-    replyDetails.reply !== "None" &&
-    replyDetails.replyType === "description"
-  ){
-    const user = await getUser(replyDetails.phone_number, replyDetails.name);
-    await handleListReply(replyDetails, user);
-
-  }
-  else if (
-    replyDetails.reply &&
-    replyDetails.reply === "Confirm" &&
-    replyDetails.replyType === "button-reply"
-  ){
-    const user = await getUser(replyDetails.phone_number, replyDetails.name);
-    await handleButtonReply(replyDetails, user);
-  } 
-  else if (
-    replyDetails.reply &&
-    replyDetails.reply === "Accept" &&
-    replyDetails.replyType === "button-reply"
-  ){
-
-  }
-}
-
 export default {
   sendText,
   sendPossibleName,
   sendConfirmation,
   sendImageToStore,
   sendToStores,
-  handleText,
-  handleListReply,
-  handleButtonReply,
-  handleImageReply,
-  handleLocationReply,
-  handleInteractiveMessages,
+  sendError,
 };

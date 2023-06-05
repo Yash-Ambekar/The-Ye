@@ -5,18 +5,20 @@ declare global {
     lat: number;
     long: number;
     storePhoneNumber: string;
+    location:{};
+    orderID: [{}]
   }
 
   interface UserDetails {
     phone_number: string;
     name: string;
     stage: number;
-    medicine: string ;
+    medicine: string;
     totalNumberOfMeds: number;
-    latitude: number ;
-    longitude: number ;
+    latitude: number;
+    longitude: number;
     currLocation: string;
-    messageID: string ;
+    orderID: order[];
   }
 
   interface textDetails {
@@ -34,7 +36,7 @@ declare global {
   }
 
   interface locationDetails {
-    name: string
+    name: string;
     replyType: string;
     phone_number: string;
     address: string;
@@ -47,16 +49,39 @@ declare global {
     phone_number: string;
     reply: string;
     replyType: string;
+    contextMessageID: string;
   }
 
   type changeDetailsReply = {
     replyType: string;
-    reply:string;
-    latitude:number ;
-    longitude:number;
+    reply: string;
+    latitude: number;
+    longitude: number;
     messageID: string;
-    address:string;
+    address: string;
+  };
+
+  interface order {
+    $elemMatch: {
+      storeName: string;
+      storePhoneNumber: string;
+      messageID: string;
+      medicineName: string;
+      currLocation: string;
+    };
   }
+
+  type getUser = {
+    phone_number: string;
+    name: string;
+    orderID: [order] | order;
+  };
+
+ type getStore = {
+  queryDetails:{}
+ }
 }
+
+
 
 export {};

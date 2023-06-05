@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema({
     latitude: Number,
     longitude: Number,
     currLocation: String,
-    messageID: String,
+    orderID: [{}],
 });
 
 export const userModel = mongoose.model('Users', userSchema);

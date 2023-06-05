@@ -6,7 +6,7 @@ const storesSchema = new mongoose.Schema({
     required: true,
     default: 0,
   },
-  StoreName: {
+  storeName: {
     type: String, 
     required: true,
   },
@@ -22,6 +22,11 @@ const storesSchema = new mongoose.Schema({
     type: String,
     required:true,
   },
+  location:{
+    type:{},
+    required:true,
+  },
+  orderSentTo: [{}]
 });
 
 export const storeModel = mongoose.model('Medical_Stores', storesSchema);
