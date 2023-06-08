@@ -16,8 +16,6 @@ import {
 import { getStores } from "../models/stores.model";
 import { checkForReply } from "./checkCondition";
 
-
-
 export async function handleText(
   textDetails: textDetails,
   stage: number | null
@@ -30,10 +28,12 @@ export async function handleText(
       } as replyDetails);
       break;
     case 1:
+      const rawMedInput = textDetails.msg;
       const med = await fuzzyLogicSearch(textDetails.msg);
       await sendPossibleName(textDetails.msg, med, textDetails.phone_number);
       await changeDetailsUsingReply(textDetails.phone_number, {
         name: textDetails.name,
+        rawMedInput: rawMedInput,
       } as replyDetails);
       break;
     case 2:
@@ -48,7 +48,7 @@ export async function handleListReply(
   replyDetails: replyDetails,
   userDetails: UserDetails
 ) {
-  changeDetailsUsingReply(userDetails.phone_number, replyDetails);
+  await changeDetailsUsingReply(userDetails.phone_number, replyDetails);
   const text = `Please send your current location by following these instructions:
     
   ➥Attachments 📎  
@@ -56,6 +56,18 @@ export async function handleListReply(
   ➥Switch on Location Services ⚙️
   ➥Send Current Location`;
   await sendText(userDetails.phone_number, text);
+}
+
+export async function handleNoneReply(replyDetails: replyDetails) {
+  const user = await getUser({
+    phone_number: replyDetails.phone_number,
+  } as getUser);
+  const updatedUser = await updateUser(
+    { phone_number: replyDetails.phone_number } as getUser,
+    { medicine: user?.rawMedInput } as UserDetails
+  );
+  await handleListReply(replyDetails, user);
+  return updatedUser;
 }
 
 export async function handleConfirmButton(
@@ -68,6 +80,25 @@ export async function handleConfirmButton(
     { orderID: messageDetails } as getUser
   );
   await changeDetailsUsingReply(userDetails.phone_number, replyDetails);
+}
+
+export async function handleReset(replyDetails: replyDetails) {
+  const updateDetails = {
+    stage: 0,
+    medicine: "",
+    totalNumberOfMeds: 0,
+    rawMedInput: "",
+    currLocation: "",
+  };
+  const updatedUser = await updateUser(
+    { phone_number: replyDetails.phone_number } as getUser,
+    updateDetails as UserDetails
+  );
+
+  const resetText = `🔄 RESET
+Your details from the previous session have been reset.`
+  await sendText(replyDetails.phone_number, resetText);
+  return updatedUser;
 }
 
 export async function handleImageReply(imageDetails: imageDetails) {
@@ -103,7 +134,7 @@ export async function handleAcceptButton(replyDetails: replyDetails) {
     },
   } as getStore);
   const textMessage = `*${store[0].storeName}* has shown interest in your order. Please contact the medical store as per your convenience.
-  contact number: ${replyDetails.phone_number}`;
+*Contact number:* ${replyDetails.phone_number}`;
   await sendText(user.phone_number, textMessage);
 }
 
@@ -121,6 +152,10 @@ export async function handleInteractiveMessages(replyDetails: replyDetails) {
       name: replyDetails.name,
     } as getUser);
     await handleConfirmButton(replyDetails, user);
+  } else if (reply === "Reset") {
+    await handleReset(replyDetails);
+  } else if (reply === "None") {
+    await handleNoneReply(replyDetails);
   } else if (reply === "Show interest") {
     await handleAcceptButton(replyDetails);
   }
@@ -130,6 +165,7 @@ export default {
   handleText,
   handleListReply,
   handleConfirmButton,
+  handleNoneReply,
   handleImageReply,
   handleLocationReply,
   handleInteractiveMessages,

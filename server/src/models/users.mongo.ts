@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
         required: true,
     },
     stage: Number,
+    rawMedInput:String,
     medicine: String,
     totalNumberOfMeds: Number,
     latitude: Number,

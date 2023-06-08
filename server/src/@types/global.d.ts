@@ -13,6 +13,7 @@ declare global {
     phone_number: string;
     name: string;
     stage: number;
+    rawMedInput:string,
     medicine: string;
     totalNumberOfMeds: number;
     latitude: number;
@@ -50,6 +51,7 @@ declare global {
     reply: string;
     replyType: string;
     contextMessageID: string;
+    rawMedInput:string;
   }
 
   type changeDetailsReply = {

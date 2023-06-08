@@ -112,7 +112,10 @@ export async function sendConfirmation(userDetails: UserDetails) {
 
 ${userDetails.medicine ? userDetails.medicine : ""}
 
-*Location*: ${userDetails.currLocation ? userDetails.currLocation : ""}`,
+*Location*: ${userDetails.currLocation ? userDetails.currLocation : ""} 
+
+*You can 🔄reset and start from the beginning if you have made a mistake*`,
+
           },
           action: {
             buttons: [
@@ -127,7 +130,7 @@ ${userDetails.medicine ? userDetails.medicine : ""}
                 type: "reply",
                 reply: {
                   id: "UNIQUE_BUTTON_ID_2",
-                  title: "Cancel",
+                  title: "Reset",
                 },
               },
             ],

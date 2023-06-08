@@ -53,7 +53,7 @@ export async function hookMessage(req: Request, res: Response) {
 
       case "interactive":
         const replyDetails = getReplies(req);
-        await handleInteractiveMessages(replyDetails);
+        await handleInteractiveMessages(replyDetails as replyDetails);
         break;
     }
 

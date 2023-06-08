@@ -1,5 +1,5 @@
-import axios from 'axios'
-import {Request} from 'express';
+import axios from "axios";
+import { Request } from "express";
 
 export function getTextDetails(req: Request) {
   const phone_number_id =
@@ -27,7 +27,7 @@ export function getTextDetails(req: Request) {
 
 export async function getImageDetails(req: Request) {
   const from = req.body.entry[0].changes[0].value.contacts[0].wa_id;
-  const name = req.body.entry[0].changes[0].value.contacts[0].profile.name
+  const name = req.body.entry[0].changes[0].value.contacts[0].profile.name;
   const image_id = req.body.entry[0].changes[0].value.messages[0].image.id;
   const image_caption =
     req.body.entry[0].changes[0].value.messages[0].image.caption;
@@ -51,32 +51,33 @@ export async function getImageDetails(req: Request) {
 
 export async function getLocationDetails(req: Request) {
   const from = req.body.entry[0].changes[0].value.contacts[0].wa_id;
-  const name = req.body.entry[0].changes[0].value.contacts[0].profile.name
+  const name = req.body.entry[0].changes[0].value.contacts[0].profile.name;
   // const address = req.body.entry[0].changes[0].value.messages[0].location.address;
   const lat = req.body.entry[0].changes[0].value.messages[0].location.latitude;
-  const long = req.body.entry[0].changes[0].value.messages[0].location.longitude;
-
+  const long =
+    req.body.entry[0].changes[0].value.messages[0].location.longitude;
 
   const orign_req = `${lat},${long}`;
-  const url = ('https://maps.googleapis.com/maps/api/distancematrix/json?' + new URLSearchParams({
-    origins: orign_req,
-    destinations: orign_req,
-    key: process.env['GOOGLE_MAPS_API_KEY'] ?? ""
-  }));
+  const url =
+    "https://maps.googleapis.com/maps/api/distancematrix/json?" +
+    new URLSearchParams({
+      origins: orign_req,
+      destinations: orign_req,
+      key: process.env["GOOGLE_MAPS_API_KEY"] ?? "",
+    });
 
   var config = {
-    method: 'get',
+    method: "get",
     url: url,
   };
 
   const response = await axios(config);
   const address = response.data.origin_addresses[0];
 
-
   console.log(
     "Location Details:",
     JSON.stringify({
-      name:name,
+      name: name,
       phone_number: from,
       address: address,
       Latitude: lat,
@@ -86,7 +87,7 @@ export async function getLocationDetails(req: Request) {
 
   return {
     replyType: "location",
-    name:name,
+    name: name,
     phone_number: from,
     address: address,
     latitude: lat,
@@ -94,18 +95,26 @@ export async function getLocationDetails(req: Request) {
   };
 }
 
-export function getReplies(req : Request) {
+export function getReplies(req: Request) {
   const from = req.body.entry[0].changes[0].value.contacts[0].wa_id;
   const wamid = req.body.entry[0].changes[0].value.messages[0]?.context.id;
   const name = req.body.entry[0].changes[0].value.contacts[0].profile.name;
   let body = "";
   let type = "";
   if (req.body.entry[0].changes[0].value.messages[0].interactive.list_reply) {
-    body = req.body.entry[0].changes[0].value.messages[0].interactive.list_reply.description;
+    body =
+      req.body.entry[0].changes[0].value.messages[0].interactive.list_reply
+        .title === "None"
+        ? "None"
+        : req.body.entry[0].changes[0].value.messages[0].interactive.list_reply
+            .description;
     type = "description";
-  }
-  else if (req.body.entry[0].changes[0].value.messages[0].interactive.button_reply) {
-    body = req.body.entry[0].changes[0].value.messages[0].interactive.button_reply.title;
+  } else if (
+    req.body.entry[0].changes[0].value.messages[0].interactive.button_reply
+  ) {
+    body =
+      req.body.entry[0].changes[0].value.messages[0].interactive.button_reply
+        .title;
     type = "button-reply";
   }
   console.log(
@@ -124,14 +133,13 @@ export function getReplies(req : Request) {
     phone_number: from,
     reply: body,
     replyType: type,
-    contextMessageID: wamid
+    contextMessageID: wamid,
   };
 }
-
 
 export default {
   getTextDetails,
   getImageDetails,
   getLocationDetails,
   getReplies,
-}
+};

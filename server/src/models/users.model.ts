@@ -24,6 +24,7 @@ export async function getUser(queryDetails: getUser) {
         phone_number: queryDetails?.phone_number,
         name: queryDetails?.name,
         stage: 0,
+        rawMedInput:"",
         medicine: "",
         totalNumberOfMeds: 0,
         latitude: 0,
@@ -117,7 +118,7 @@ export async function changeDetailsUsingLocation(
         { phone_number: userPhoneNumber } as getUser,
         updateDetails as UserDetails
       );
-      console.log("User stage to 0\n ", updatedUser);
+      console.log("User stage to 0\n ");
       return updatedUser;
     }
   } else {
@@ -140,8 +141,8 @@ export async function changeDetailsUsingReply(
         replyDetails &&
         replyDetails?.replyType &&
         replyDetails?.replyType === "description"
-      ) {
-        if (user.medicine == "") {
+      ) {  
+       if (replyDetails.reply !== "None" && user.medicine == "") {
           const updateDetails = {
             medicine: replyDetails?.reply,
             stage: user.stage + 1,
@@ -151,7 +152,7 @@ export async function changeDetailsUsingReply(
             updateDetails as UserDetails
           );
           return updatedUser;
-        } else {
+        } else if (replyDetails.reply !== "None") {
           const updateDetails = {
             medicine: user.medicine + ", " + replyDetails.reply,
           };
@@ -161,6 +162,11 @@ export async function changeDetailsUsingReply(
           );
           return updatedUser;
         }
+      }
+      else if(replyDetails?.rawMedInput){
+        const updatedUser = await updateUser({
+          phone_number:userPhoneNumber
+        } as getUser, {rawMedInput:replyDetails.rawMedInput} as UserDetails);
       }
       if (user.totalNumberOfMeds === 0) {
         await updateUser(
@@ -182,12 +188,14 @@ export async function changeDetailsUsingReply(
         stage: 0,
         medicine: "",
         totalNumberOfMeds: 0,
+        rawMedInput: "",
+        currLocation: "",
       };
       const updatedUser = await updateUser(
         { phone_number: userPhoneNumber } as getUser,
         updateDetails as UserDetails
       );
-      console.log("User stage to 0\n ", updatedUser);
+      console.log("User stage to 0\n ");
       return updatedUser;
     }
   } else {

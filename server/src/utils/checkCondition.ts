@@ -23,13 +23,29 @@ export function checkForReply(replyDetails: replyDetails) {
     replyDetails.replyType === "description"
   ) {
     return "description";
-  } else if (
+  } 
+  else if(
+    replyDetails.reply &&
+    replyDetails.reply === "None" &&
+    replyDetails.replyType === "description"
+  ) {
+    return "None";
+  }
+  else if (
     replyDetails.reply &&
     replyDetails.reply === "Confirm" &&
     replyDetails.replyType === "button-reply"
   ) {
     return "Confirm";
-  } else if (
+  } 
+
+  else if (
+    replyDetails.reply &&
+    replyDetails.reply === "Reset" &&
+    replyDetails.replyType === "button-reply"
+  ) {
+    return "Reset";
+  }else if (
     replyDetails.reply &&
     replyDetails.reply === "Show interest" &&
     replyDetails.replyType === "button-reply"
