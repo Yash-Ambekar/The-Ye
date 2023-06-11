@@ -106,7 +106,7 @@ export async function handleImageReply(imageDetails: imageDetails) {
   const sender = imageDetails.phone_number;
   const caption = imageDetails.caption;
   const userDetails = await getUser({
-    phone_number: imageDetails.phone_number,
+    phone_number: sender,
     name: imageDetails.name,
   } as getUser);
   await sendImageToStores(imageID, userDetails);
