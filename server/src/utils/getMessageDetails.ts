@@ -1,5 +1,7 @@
 import axios from "axios";
 import { Request } from "express";
+import fs, { writeFile } from "fs";
+
 
 export function getTextDetails(req: Request) {
   const phone_number_id =
@@ -25,19 +27,66 @@ export function getTextDetails(req: Request) {
   };
 }
 
+async function getImageURL(mediaID: string) {
+  try {
+    const response = await fetch(
+      `https://graph.facebook.com/v17.0/${mediaID}/`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${process.env["WHATSAPP_TOKEN"]}`,
+        },
+      }
+    );
+    const responseObject = await response.json();
+    if (response.status === 200) {
+      return { url: responseObject.url, mimetype: responseObject.mime_type };
+    }
+  } catch (err) {
+    console.error(`Couldn't retrieve the imageURL: ${err}`);
+  }
+}
+
+
+async function getImageFromURL(imageURL: string) {
+  try {
+    const response = await axios({
+      method: 'get',
+      url: imageURL,
+      responseType: 'stream',
+      headers: {'Authorization': `Bearer ${process.env["WHATSAPP_TOKEN"]}`},
+    })
+      .then(async function (response) {
+        const time = Date.now();
+        const path = `src/classifier/Images/${time}.jpg`;
+        await response.data.pipe(fs.createWriteStream(path));
+        return path;
+      });
+      return response
+    
+  } catch (err) {
+    console.error(`Couldn't retrieve the image: ${err}`);
+  }
+}
+
 export async function getImageDetails(req: Request) {
   const from = req.body.entry[0].changes[0].value.contacts[0].wa_id;
   const name = req.body.entry[0].changes[0].value.contacts[0].profile.name;
   const image_id = req.body.entry[0].changes[0].value.messages[0].image.id;
   const image_caption =
     req.body.entry[0].changes[0].value.messages[0].image.caption;
+  const imageURL = await getImageURL(image_id);
+  const imagePath = await getImageFromURL(imageURL?.url);
   console.log(
     "Image Details:",
     JSON.stringify({
       name: name,
       sender: from,
       imageID: image_id,
+      imageURL: imageURL?.url,
+      imageMimeType: imageURL?.mimetype,
       caption: image_caption,
+      imagePath:imagePath,
     })
   );
 
@@ -45,7 +94,10 @@ export async function getImageDetails(req: Request) {
     name: name,
     phone_number: from,
     imageID: image_id,
+    imageURL: imageURL?.url,
+    imageMimeType: imageURL?.mimetype,
     caption: image_caption,
+    imagePath:imagePath,
   };
 }
 

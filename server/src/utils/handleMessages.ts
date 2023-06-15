@@ -15,6 +15,7 @@ import {
 } from "../models/users.model";
 import { getStores } from "../models/stores.model";
 import { checkForReply } from "./checkCondition";
+import { imageClassifier } from "../classifier/imageClassifier"
 
 export async function handleText(
   textDetails: textDetails,
@@ -74,6 +75,10 @@ export async function handleConfirmButton(
   replyDetails: replyDetails,
   userDetails: UserDetails
 ) {
+
+  if (!userDetails.rawMedInput) {
+    await sendImageToStores(userDetails.imageID, userDetails)
+  }
   const messageDetails = await sendToStores(userDetails);
   await updateUser(
     { phone_number: userDetails.phone_number } as getUser,
@@ -102,16 +107,43 @@ Your details from the previous session have been reset.`
 }
 
 export async function handleImageReply(imageDetails: imageDetails) {
-  const imageID = imageDetails.imageID;
   const sender = imageDetails.phone_number;
-  const caption = imageDetails.caption;
-  const userDetails = await getUser({
+  const imageID = imageDetails.imageID;
+  const imagePath = imageDetails.imagePath;
+
+  //updating the image path and return the updated user as full
+  const userDetails = await updateUser({
     phone_number: sender,
     name: imageDetails.name,
-  } as getUser);
-  await sendImageToStores(imageID, userDetails);
-  await sendToStores(userDetails);
+  } as getUser, { imageID: imageID } as UserDetails);
+
+
+  const prediction = await imageClassifier(imagePath);
+  console.log(`Prediction: ${prediction}`)
+  if (prediction) {
+    const text = `✅ ACCEPTED
+Great news! The image you provided has been accepted. Thank you for sharing the image, and we will now proceed with the necessary steps.`;
+    await sendText(sender, text);
+    await updateUser(
+      { phone_number: sender } as getUser,
+      { stage: (userDetails as UserDetails).stage + 1 } as UserDetails
+    );
+    const locationText = `Please send your current location by following these instructions:
+    
+  ➥Attachments 📎  
+  ➥Location 📍
+  ➥Switch on Location Services ⚙️
+  ➥Send Current Location`;
+    await sendText(sender, locationText);
+  }
+  else {
+    const text = `🚫 REJECTED
+Please ensure that the image you are providing is clear and not blurred. It's important to send a correct and valid image for accurate processing. Kindly double-check the image and send it again. Thank you! `;
+    await sendText(sender, text);
+  }
 }
+
+
 
 export async function handleLocationReply(
   userDetails: UserDetails,

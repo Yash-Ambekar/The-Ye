@@ -5,15 +5,16 @@ declare global {
     lat: number;
     long: number;
     storePhoneNumber: string;
-    location:{};
-    orderID: [{}]
+    location: {};
+    orderID: [{}];
   }
 
   interface UserDetails {
     phone_number: string;
     name: string;
     stage: number;
-    rawMedInput:string,
+    imageID:string,
+    rawMedInput: string;
     medicine: string;
     totalNumberOfMeds: number;
     latitude: number;
@@ -33,7 +34,11 @@ declare global {
     name: string;
     phone_number: string;
     imageID: string;
+    imageURL: string;
+    imageMimeType: string;
     caption: string;
+    imagePath:string;
+
   }
 
   interface locationDetails {
@@ -51,7 +56,7 @@ declare global {
     reply: string;
     replyType: string;
     contextMessageID: string;
-    rawMedInput:string;
+    rawMedInput: string;
   }
 
   type changeDetailsReply = {
@@ -79,11 +84,9 @@ declare global {
     orderID: [order] | order;
   };
 
- type getStore = {
-  queryDetails:{}
- }
+  type getStore = {
+    queryDetails: {};
+  };
 }
-
-
 
 export {};

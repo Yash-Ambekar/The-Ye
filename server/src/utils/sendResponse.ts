@@ -92,6 +92,24 @@ You can also send us a photo of your prescription. To do this, tap on the paperc
 }
 
 export async function sendConfirmation(userDetails: UserDetails) {
+
+  const text = `*Confirm the List of Medicines and Location*
+
+${userDetails.medicine}
+  
+*Location*: ${userDetails.currLocation ? userDetails.currLocation : ""} 
+  
+*You can 🔄reset and start from the beginning if you have made a mistake*`;
+
+
+  // Only the location confirmation incase of an image
+  const locationText = `*Confirm the Location*
+  
+*Location*: ${userDetails.currLocation ? userDetails.currLocation : ""} 
+  
+*You can 🔄reset and start from the beginning if you have made a mistake*`;
+
+// Sending a confirmation
   const response = await fetch(
     `https://graph.facebook.com/v16.0/${process.env["WHATSAPP_PHONE_NUMBER_ID"]}/messages`,
     {
@@ -108,13 +126,7 @@ export async function sendConfirmation(userDetails: UserDetails) {
         interactive: {
           type: "button",
           body: {
-            text: `*Confirm the List of Medicines and Location*
-
-${userDetails.medicine ? userDetails.medicine : ""}
-
-*Location*: ${userDetails.currLocation ? userDetails.currLocation : ""} 
-
-*You can 🔄reset and start from the beginning if you have made a mistake*`,
+            text: userDetails.rawMedInput ? text : locationText,
 
           },
           action: {
@@ -220,32 +232,8 @@ export async function sendImageToStore(
   console.log(response.status);
 }
 
-export async function sendImageToStores(
-  imageID: string,
-  userDetails: UserDetails
-) {
-  const stores = await getStores({
-    queryDetails: {
-      location: {
-        $near: {
-          $geometry: {
-            type: "Point",
-            coordinates: [userDetails.longitude, userDetails.latitude],
-          },
-          $maxDistance: 5000,
-        },
-      },
-    },
-  });
-  await Promise.all(
-    stores?.map(async (store) => {
-      await sendImageToStore(store.storePhoneNumber, imageID);
-    })
-  );
-}
-// Sending Patients Medicine Request to the Stores
 
-export async function sendToStores(userDetails: UserDetails) {
+async function Stores(userDetails :UserDetails){
   const stores = await getStores({
     queryDetails: {
       location: {
@@ -259,19 +247,42 @@ export async function sendToStores(userDetails: UserDetails) {
       },
     },
   } as getStore);
+  return stores
+}
+
+export async function sendImageToStores(
+  imageID: string,
+  userDetails: UserDetails
+) {
+  const stores = await Stores(userDetails)
+  await Promise.all(
+    stores?.map(async (store) => {
+      await sendImageToStore(store.storePhoneNumber, imageID);
+    })
+  );
+}
+// Sending Patients Medicine Request to the Stores
+
+export async function sendToStores(userDetails: UserDetails, storesArray?:Stores[]) {
+  let stores;
+  if(storesArray !== undefined){
+    stores = storesArray;
+  }else{
+    stores = await Stores(userDetails);
+  }
   let messageDetails: Object[] = [];
   await Promise.all(
     stores?.map(async (store) => {
       const messageID = await sendRequestToSingleStore(
         userDetails.phone_number,
         store.storePhoneNumber,
-        userDetails.medicine,
+        userDetails?.medicine,
         userDetails.currLocation
       );
       messageDetails.push({
         storeName: store.storeName,
         storePhoneNumber: store.storePhoneNumber,
-        medicineName: userDetails.medicine,
+        medicineName: userDetails?.medicine,
         currLocation: userDetails.currLocation,
         messageID: messageID,
       });

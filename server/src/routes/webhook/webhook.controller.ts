@@ -41,7 +41,7 @@ export async function hookMessage(req: Request, res: Response) {
 
       case "image":
         const imageDetails = await getImageDetails(req);
-        await handleImageReply(imageDetails);
+        await handleImageReply(imageDetails as imageDetails);
         break;
 
       case "location":
