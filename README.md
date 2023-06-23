@@ -48,6 +48,18 @@ On the Medicine store end, he will receive following -
 <img src="studyMaterial/Images/Store-Side.jpeg"  height="500">
 </p>
 
+In other case where the user sends image prescription to the bot instead, the process followed will be - 
+
+<p align = "center">
+<img src="studyMaterial/Images/userSide_image.png"  height="500">
+</p>
+
+And the medicine store will receive following - 
+
+<p align = "center">
+<img src="studyMaterial/Images/storeSide__image.png"  height="500">
+</p>
+
 ## Steps to setup locally
 
 ##### Setting up using Ngrok
