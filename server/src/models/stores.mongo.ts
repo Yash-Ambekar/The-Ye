@@ -7,7 +7,7 @@ const storesSchema = new mongoose.Schema({
     default: 0,
   },
   storeName: {
-    type: String, 
+    type: String,
     required: true,
   },
   lat: {

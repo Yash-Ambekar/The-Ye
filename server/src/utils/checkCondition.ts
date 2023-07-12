@@ -23,7 +23,7 @@ export function checkForReply(replyDetails: replyDetails) {
     replyDetails.replyType === "description"
   ) {
     return "description";
-  } 
+  }
   else if(
     replyDetails.reply &&
     replyDetails.reply === "None" &&
@@ -37,7 +37,7 @@ export function checkForReply(replyDetails: replyDetails) {
     replyDetails.replyType === "button-reply"
   ) {
     return "Confirm";
-  } 
+  }
 
   else if (
     replyDetails.reply &&

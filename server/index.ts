@@ -1,5 +1,10 @@
+///<reference path = "./src/@types/store.d.ts">
+///<reference path = "./src/@types/messages.d.ts">
+///<reference path = "./src/@types/user.d.ts">
+
 import app from "./src/server";
 import { connect, connection } from "mongoose";
+import { loadModel } from "./src/classifier/imageClassifier";
 
 const port = process.env["PORT"];
 const mongoURL = process.env["MONGO_ATLAS_URI"];
@@ -13,6 +18,7 @@ connection.on("error", (err) => {
 });
 
 async function runServer(){
+  await loadModel();
   await connect(mongoURL as string);
   app.listen(port, () => {
     console.log(`Listening on port ${port}`);

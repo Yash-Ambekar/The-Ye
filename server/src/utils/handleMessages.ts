@@ -4,7 +4,6 @@ import {
   sendImageToStores,
   sendPossibleName,
   sendToStores,
-  sendError,
 } from "./sendResponse";
 import { fuzzyLogicSearch } from ".././models/medicine.model";
 import {
@@ -16,6 +15,7 @@ import {
 import { getStores } from "../models/stores.model";
 import { checkForReply } from "./checkCondition";
 import { imageClassifier } from "../classifier/imageClassifier"
+import { getTextDetails } from "./getMessageDetails";
 
 export async function handleText(
   textDetails: textDetails,
@@ -40,7 +40,9 @@ export async function handleText(
     case 2:
     case 3:
     case 4:
-      await sendError(textDetails.phone_number);
+      const errorText = `❌ ERROR
+Please follow the instruction and reply accordingly as it helps us process your request to the best of our ability`;
+      await sendText(textDetails.phone_number, errorText);
       break;
   }
 }
@@ -87,7 +89,7 @@ export async function handleConfirmButton(
   await changeDetailsUsingReply(userDetails.phone_number, replyDetails);
 }
 
-export async function handleReset(replyDetails: replyDetails) {
+export async function handleReset(replyDetails: replyDetails | textDetails) {
   const updateDetails = {
     stage: 0,
     medicine: "",

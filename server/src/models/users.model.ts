@@ -94,7 +94,7 @@ export async function changeDetailsUsingLocation(
       phone_number: userPhoneNumber,
       name: replyDetails.name,
     } as getUser);
-    if (user.stage < 4) {
+    if (user.stage < 3) {
       if (replyDetails?.replyType && replyDetails?.replyType === "location") {
         const updateDetails = {
           latitude: replyDetails.latitude,
@@ -136,7 +136,7 @@ export async function changeDetailsUsingReply(
       phone_number: userPhoneNumber,
       name: replyDetails.name,
     } as getUser);
-    if (user.stage < 4) {
+    if (user.stage < 3) {
       if (
         replyDetails &&
         replyDetails?.replyType &&

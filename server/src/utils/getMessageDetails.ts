@@ -58,7 +58,7 @@ async function getImageFromURL(imageURL: string) {
     })
       .then(async function (response) {
         const time = Date.now();
-        const path = `src/classifier/Images/${time}.jpg`;
+        const path = `src/classifier/Images/${time}.jpeg`;
         await response.data.pipe(fs.createWriteStream(path));
         return path;
       });

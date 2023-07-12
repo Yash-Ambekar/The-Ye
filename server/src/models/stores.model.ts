@@ -2,7 +2,7 @@ import axios from "axios";
 import { storeModel } from "./stores.mongo";
 import { type } from "os";
 
-let stores = [
+const stores = [
   // {
   //     storeID: 0,
   //     storeName: "Soham's Medical Store",
@@ -29,7 +29,7 @@ let stores = [
     storeName: "Yash's Medical Store",
     lat: 19.10869426849005,
     long: 72.88467675985991,
-    storePhoneNumber: process.env["YASH_PHONE_NUMBER"] ?? "",
+    storePhoneNumber: process.env.YASH_PHONE_NUMBER ?? "",
   },
 ];
 
@@ -40,16 +40,16 @@ async function getDistance(origin: number[], destination: number[]) {
   const params = new URLSearchParams({
     origins: orign_req,
     destinations: destn_req,
-    key: process.env["GOOGLE_MAPS_API_KEY"] ?? "",
+    key: process.env.GOOGLE_MAPS_API_KEY ?? "",
   });
 
   const url =
     "https://maps.googleapis.com/maps/api/distancematrix/json?" +
     params.toString();
 
-  var config = {
+  const config = {
     method: "get",
-    url: url,
+    url,
   };
 
   const response = await axios(config);
@@ -67,7 +67,7 @@ export async function getStores2(userDetails: UserDetails) {
     stores.map(async (store) => {
       const destination = [store.lat, store.long];
       const distance = await getDistance(origin as number[], destination);
-      //Finding the stores within 5KM radius
+      // Finding the stores within 5KM radius
       if (distance < 5000) {
         newStores.push(store as Stores);
       }
@@ -80,7 +80,7 @@ export async function getStores2(userDetails: UserDetails) {
 export async function getStores(query: getStore){
 
   try{
-    let nearByStores:Stores[] = [];
+    const nearByStores:Stores[] = [];
     const storesInBSON = await storeModel.find(query.queryDetails).exec();
     await Promise.all(storesInBSON.map((doc)=>{
       nearByStores.push(doc.toObject() as Stores);
@@ -102,8 +102,8 @@ export async function updateStoreDetails(
   try {
     const storeInBSON = await storeModel.findOneAndUpdate(
       {
-        storePhoneNumber: storePhoneNumber,
-        storeName: storeName,
+        storePhoneNumber,
+        storeName,
       },
       updateDetails,
       {

@@ -29,11 +29,11 @@ export async function sendPossibleName(
     title: "None",
   });
   const response = await fetch(
-    `https://graph.facebook.com/v16.0/${process.env["WHATSAPP_PHONE_NUMBER_ID"]}/messages`,
+    `https://graph.facebook.com/v16.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`,
     {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env["WHATSAPP_TOKEN"]}`,
+        Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -68,11 +68,11 @@ export async function sendText(phoneNumber: string, text: string) {
 
 You can also send us a photo of your prescription. To do this, tap on the paperclip icon below and select 'Camera'📷 or 'Gallery'. We'll review it and get back to you soon. Thanks! ✌️`;
   const response = await fetch(
-    `https://graph.facebook.com/v16.0/${process.env["WHATSAPP_PHONE_NUMBER_ID"]}/messages`,
+    `https://graph.facebook.com/v16.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`,
     {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env["WHATSAPP_TOKEN"]}`,
+        Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -96,26 +96,26 @@ export async function sendConfirmation(userDetails: UserDetails) {
   const text = `*Confirm the List of Medicines and Location*
 
 ${userDetails.medicine}
-  
-*Location*: ${userDetails.currLocation ? userDetails.currLocation : ""} 
-  
+
+*Location*: ${userDetails.currLocation ? userDetails.currLocation : ""}
+
 *You can 🔄reset and start from the beginning if you have made a mistake*`;
 
 
   // Only the location confirmation incase of an image
   const locationText = `*Confirm the Location*
-  
-*Location*: ${userDetails.currLocation ? userDetails.currLocation : ""} 
-  
-*You can 🔄reset and start from the beginning if you have made a mistake*`;
+
+*Location*: ${userDetails.currLocation ? userDetails.currLocation : ""}
+
+*You can 🔄reset by typing "/reset" or click the reset button and start from the beginning if you have made a mistake*`;
 
 // Sending a confirmation
   const response = await fetch(
-    `https://graph.facebook.com/v16.0/${process.env["WHATSAPP_PHONE_NUMBER_ID"]}/messages`,
+    `https://graph.facebook.com/v16.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`,
     {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env["WHATSAPP_TOKEN"]}`,
+        Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -162,11 +162,11 @@ export async function sendRequestToSingleStore(
   location: string
 ) {
   const response = await fetch(
-    `https://graph.facebook.com/v16.0/${process.env["WHATSAPP_PHONE_NUMBER_ID"]}/messages`,
+    `https://graph.facebook.com/v16.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`,
     {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env["WHATSAPP_TOKEN"]}`,
+        Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -210,11 +210,11 @@ export async function sendImageToStore(
   imageID: string
 ) {
   const response = await fetch(
-    `https://graph.facebook.com/v16.0/${process.env["WHATSAPP_PHONE_NUMBER_ID"]}/messages`,
+    `https://graph.facebook.com/v16.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`,
     {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env["WHATSAPP_TOKEN"]}`,
+        Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -270,7 +270,7 @@ export async function sendToStores(userDetails: UserDetails, storesArray?:Stores
   }else{
     stores = await Stores(userDetails);
   }
-  let messageDetails: Object[] = [];
+  const messageDetails: Object[] = [];
   await Promise.all(
     stores?.map(async (store) => {
       const messageID = await sendRequestToSingleStore(
@@ -284,7 +284,7 @@ export async function sendToStores(userDetails: UserDetails, storesArray?:Stores
         storePhoneNumber: store.storePhoneNumber,
         medicineName: userDetails?.medicine,
         currLocation: userDetails.currLocation,
-        messageID: messageID,
+        messageID,
       });
     })
   );
@@ -292,32 +292,6 @@ export async function sendToStores(userDetails: UserDetails, storesArray?:Stores
   return messageDetails;
 }
 
-export async function sendError(userPhoneNumber: string) {
-  const errorText = `❌ ERROR
-Please follow the instruction and reply accordingly as it helps us process your request to the best of our ability`;
-  const response = await fetch(
-    `https://graph.facebook.com/v16.0/${process.env["WHATSAPP_PHONE_NUMBER_ID"]}/messages`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env["WHATSAPP_TOKEN"]}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        messaging_product: "whatsapp",
-        recipient_type: "individual",
-        to: `${userPhoneNumber}`,
-        type: "text",
-        text: {
-          preview_url: false,
-          body: errorText,
-        },
-      }),
-    }
-  );
-
-  console.log(response.status);
-}
 
 export default {
   sendText,
@@ -325,5 +299,4 @@ export default {
   sendConfirmation,
   sendImageToStore,
   sendToStores,
-  sendError,
 };

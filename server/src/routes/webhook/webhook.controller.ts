@@ -4,6 +4,7 @@ import {
   handleLocationReply,
   handleImageReply,
   handleInteractiveMessages,
+  handleReset,
 } from "../../utils/handleMessages";
 import {
   getTextDetails,
@@ -36,6 +37,10 @@ export async function hookMessage(req: Request, res: Response) {
       case "text":
         const textDetails = getTextDetails(req);
         const user = await getUser({phone_number: textDetails.phone_number, name: textDetails.name} as getUser);
+        if(textDetails.msg === "/reset"){
+          await handleReset(textDetails);
+          break;
+        }
         await handleText(textDetails, user && user.stage);
         break;
 

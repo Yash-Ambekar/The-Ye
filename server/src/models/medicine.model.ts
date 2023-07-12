@@ -2,7 +2,7 @@ import { readFile } from "fs/promises";
 import Fuse from "fuse.js"
 
 
-//Utility function for reading the JSON file
+// Utility function for reading the JSON file
 async function readJsonFile(path:string) {
   const file = await readFile(path, "utf8");
   return JSON.parse(file);
@@ -76,20 +76,20 @@ export async function fuzzyLogicSearch(medicineName:string) {
     "score": 1,
   };
   // Create a new instance of the Fuse.js search object
-  
+
   for (let i = 65; i <= 90; i++) {
       const fuse = new Fuse(medicineNames[String.fromCharCode(i)], options);
-     
-      
+
+
       // Search for a medicine name
       const searchTerm = medicineName;
       const tempRes = fuse.search(searchTerm);
-      if (tempRes && tempRes[0] && tempRes[0].score && tempRes[0].score < result["score"]) {
-      
-        result["top3"] = result["top2"];
-        result["top2"] = result["top1"];
-        result["top1"] = tempRes[0].item as string;
-        result["score"] =  tempRes[0].score;
+      if (tempRes && tempRes[0] && tempRes[0].score && tempRes[0].score < result.score) {
+
+        result.top3 = result.top2;
+        result.top2 = result.top1;
+        result.top1 = tempRes[0].item as string;
+        result.score =  tempRes[0].score;
       }
   }
 
