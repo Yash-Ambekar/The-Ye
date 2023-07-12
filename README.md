@@ -5,7 +5,7 @@ Medicine delivery apps are popular but can be inconvenient due to limited availa
 ## Index
 
 - [Tech Stack](#tech-stack)
-- [Medicine Dataset](#medicine-dataset)
+- [Medicine Dataset](#dataset)
 - [How it works](#how-it-works)
 - [Steps to setup locally](#steps-to-setup-locally)
 - [References](#references)
@@ -34,7 +34,7 @@ On the user end, the steps followed are as follows -
 
 1. The user initiates the conversation by sending a message such as “Hi” or “Hello”
 2. As demonstrated in the figure below, the bot will reply with a greeting message with instructions regarding next steps to follow.
-3. In the example below, the user sends “Zerodol” as the required medicine. The bot replies with a list of top 3 available medicine names in the database with an interactive option to choose
+3. In the example below, the user sends ```Zerodol``` as the required medicine. The bot replies with a list of top 3 available medicine names in the database with an interactive option to choose
 4. After choosing the medicine from the list, the medicine name is replied to the bot
 5. The user is then prompted to send the location where he needs the medicine, this location is received by the bot which, with the help of Google Maps API, retrieves the address.
 6. This address, along with the requested medicine, is then resent to the user to get confirmed
@@ -46,6 +46,18 @@ On the Medicine store end, he will receive following -
 
 <p align = "center">
 <img src="studyMaterial/Images/Store-Side.jpeg"  height="500">
+</p>
+
+In other case where the user sends image prescription to the bot instead, the process followed will be - 
+
+<p align = "center">
+<img src="studyMaterial/Images/userSide_image.png"  height="500">
+</p>
+
+And the medicine store will receive following - 
+
+<p align = "center">
+<img src="studyMaterial/Images/storeSide__image.png"  height="500">
 </p>
 
 ## Steps to setup locally
