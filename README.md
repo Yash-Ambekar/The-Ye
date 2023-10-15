@@ -13,13 +13,13 @@ Medicine delivery apps are popular but can be inconvenient due to limited availa
 ## Tech Stack
 
 | Name                        | Description                                                                    |
-| --------------------------- | ------------------------------------------------------------------------------ | --- |
+| --------------------------- | ------------------------------------------------------------------------------ |
 | Whatsapp Business Cloud API | Used in connecting the patient to the medical store through messenger chat     |
 | NodeJS                      | All the backend processsing takes place inside the NodeJS Server.              |
 | Google Maps API             | Used to retrieve the coordinates and address of the patient and medical stores. |     
 |MongoDB                      | Used to store user and medical Store data.|
 |Tensorflow                   | Used for making CNN image classifier and loading it to the node server using TensorflowJS|
-|OpenCV                       | For converting the input images to BGR valued matrix (cv.MAT)
+|OpenCV                       | For converting the input images to BGR valued matrix (cv.MAT)|
 
 
 ## Dataset
