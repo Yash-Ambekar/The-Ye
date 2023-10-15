@@ -95,7 +95,8 @@ Example link -
 <img src="studyMaterial/Images/CallBack_URL.png" >
 </p>
 
-**NOTE:** Also subscribe to the messages mentioned in the ‘Webhook Fields’ section just below ‘Callback URL’ after verifying the webhook callback URL.
+> <font color="blue"> **NOTE:** </font>
+> Also subscribe to the messages mentioned in the ‘Webhook Fields’ section just below ‘Callback URL’ after verifying the webhook callback URL.
 
 **Step - 7**: Done! You are all set for testing the chatbot by sending “Hi” to the Test Number allotted to you by the Whatsapp Business API.
 
