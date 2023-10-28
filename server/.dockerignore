@@ -1,8 +1,0 @@
-**/node_modules/
-**/dist
-npm-debug.log
-JS_Coverted_Model
-*.h5
-*.md
-Images
-.DS_Store
